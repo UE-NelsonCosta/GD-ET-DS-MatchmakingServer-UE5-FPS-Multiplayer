@@ -4,10 +4,11 @@
 #include <iostream>  
 #include <vector>
 #include <thread>
+#include "ProjectMacros.h"
 
 struct ClientConnection
 {
-	SOCKET ClientSocket;
+	SOCKET ClientSocket = 0;
 	std::string Username;
 	std::string password;
 };

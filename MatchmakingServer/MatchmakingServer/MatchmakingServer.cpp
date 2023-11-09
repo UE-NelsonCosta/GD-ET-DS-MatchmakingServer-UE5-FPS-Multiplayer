@@ -24,7 +24,7 @@
 */
 
 #pragma once
-#include "Utils.h"
+#include "Utils_Server.h"
 
 // Dynamically linking of a lib file, you normally do this in your projects settings
 #pragma comment(lib, "ws2_32.lib")
@@ -35,9 +35,6 @@ int  AcceptConnection();
 int main(int argc, char* argv[])
 {
 	int ErrorCode = 0;
-
-	std::vector<std::string> params;
-	ParseMessage("LGN|Hello|World", params);
 
 	// Parse Any Commandline Arguments Namely IP and Port To Connect To
 	ParseCommandlineArguments(argc, argv);
