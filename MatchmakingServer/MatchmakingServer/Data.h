@@ -17,8 +17,8 @@ struct ClientConnection
 namespace ServerData
 {
 	// Declaring Defaults For Project
-	const char* DefaultExecutionPath = "";
-	const wchar_t* DefaultServerIPAddress = L"127.0.0.1";
+	const char*		DefaultExecutionPath = "";
+	const wchar_t*	DefaultServerIPAddress = L"127.0.0.1";
 	const int		DefaultServerSocketPort = 42069;
 
 	// Non Const And Overridable Runtime Variables, Using Standard Library Objects To Facilitate Usage
