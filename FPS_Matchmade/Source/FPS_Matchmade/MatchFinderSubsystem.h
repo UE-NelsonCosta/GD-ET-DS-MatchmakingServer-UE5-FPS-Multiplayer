@@ -25,10 +25,10 @@ class FWorkerFindMatch;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnConnectingToMatchmakingServerStarted);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerSucceeded, FString&, Reason);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerFailed, FString&, Reason);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerSucceeded, FString, Reason);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerFailed, FString, Reason);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameFound, FString&, IPnPort, FString&, AdditionalParams );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameFound, FString, IPnPort, FString, AdditionalParams );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameFindCanceled);
 
 // NOTE: As this contains important variables to serialize such as where to connect to and port, we keep this data saved

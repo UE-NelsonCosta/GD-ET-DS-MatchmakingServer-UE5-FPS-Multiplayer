@@ -97,28 +97,29 @@ uint32 FWorkerFindMatch::Run()
 	bool IsValidIP = FormatIPv4StringToNumerics(MatchFinderSubsystem->MatchmakingServerIP, ParsedIPv4);
 	bool IsValidPort = HasValidPort(MatchFinderSubsystem->MatchmakingServerPort);
 	if(!IsValidIP || !IsValidPort)
+	{
+		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Bad IP Given: Please Check Config File"));
 		return 2;
+	}
 	
 	if(!CreateSocketObject(SocketToMatchmakingServer))
+	{
+		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Failed To Create Socket Object"));
 		return 3;
-
+	}
+		
 	TSharedRef<FInternetAddr> MatchmakingServerAddress = CreateInternetAddressToMatchmakingServer(ParsedIPv4);	
-	if (!SocketToMatchmakingServer->Connect(MatchmakingServerAddress.Get())){}
-	//{
-		// Handle connection failure
-	//	return 1;
-	//}
+	if (!SocketToMatchmakingServer->Connect(MatchmakingServerAddress.Get()))
+	{
+		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Failed To Connect To MatchmakingServer With Given IP"));
+		return 4;
+	}
 
+	MatchFinderSubsystem->OnConnectionToMatchmakingServerSucceededEvent.Broadcast("Success!");
 
-
-
-
+	// TODO: Start Sending And Receiving Messages!
 	
-	
-	FOnConnectingToMatchmakingServerSucceeded OnConnectionToMatchmakingServerSucceededEvent;
-	FOnConnectingToMatchmakingServerFailed OnConnectingToMatchmakingServerFailedEvent;
-
-	FOnGameFound OnGameFoundEvent;
+	//FOnGameFound OnGameFoundEvent;
 
 	return 0;
 }
