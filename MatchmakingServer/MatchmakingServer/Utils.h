@@ -267,21 +267,38 @@ void LogMessage(const char* Message)
 
 #pragma region InitializationUtils
 
-int InitializeServerApplication()
-{
-    int ErrorCode = 0;
-
-    InitializeServerData();
-
-    ErrorCode = InitializeServerSocket();
-
-    InitializeThreadJobs();
-
-    return ErrorCode;
-}
-
 void InitializeServerData()
 {
+}
+
+int  InitializeWSAStartup()
+{
+    // Intializes the WindowSocketApplication (WSA For Short) Just A DLL Process To Help With Everything
+    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup
+    return WSAStartup(MAKEWORD(2, 0), &ServerData::WSASocketInformation);
+}
+
+int  CreateServerSocket()
+{
+    ServerData::ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    return ServerData::ServerSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
+}
+
+int  BindSocketToAddress()
+{
+    // Clear Out Server Socket Memory Then Fill In The Important Information
+    ZeroMemory(&ServerData::ServerAddress, sizeof(ServerData::ServerAddress));
+    ServerData::ServerAddress.sin_family = AF_INET;
+    ServerData::ServerAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
+    ServerData::ServerAddress.sin_port = htons(ServerData::ServerSocketPort);  // Port
+
+    return bind(ServerData::ServerSocket, (struct sockaddr*)&ServerData::ServerAddress, sizeof(ServerData::ServerAddress));
+}
+
+int  SetSocketToListenState()
+{
+    //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
+    return listen(ServerData::ServerSocket, MaxPendingConnections);
 }
 
 int  InitializeServerSocket()
@@ -326,55 +343,53 @@ int  InitializeServerSocket()
     return NO_ERROR;
 }
 
-int  InitializeWSAStartup()
+int InitializeServerApplication()
 {
-    // Intializes the WindowSocketApplication (WSA For Short) Just A DLL Process To Help With Everything
-    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup
-    return WSAStartup(MAKEWORD(2, 0), &ServerData::WSASocketInformation);
-}
+    int ErrorCode = 0;
 
-int  CreateServerSocket()
-{
-    ServerData::ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    return ServerData::ServerSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
-}
+    InitializeServerData();
 
-int  BindSocketToAddress()
-{
-    // Clear Out Server Socket Memory Then Fill In The Important Information
-    ZeroMemory(&ServerData::ServerAddress, sizeof(ServerData::ServerAddress));
-    ServerData::ServerAddress.sin_family = AF_INET;
-    ServerData::ServerAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
-    ServerData::ServerAddress.sin_port = htons(ServerData::ServerSocketPort);  // Port
-
-    return bind(ServerData::ServerSocket, (struct sockaddr*)&ServerData::ServerAddress, sizeof(ServerData::ServerAddress));
-}
-
-int  SetSocketToListenState()
-{
-    //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
-    return listen(ServerData::ServerSocket, MaxPendingConnections);
-}
-
-void InitializeThreadJobs()
-{
-    // We Only Use One For Now, But In A Bigger Application, We Would Need Various
-    //ServerData::Consumers.emplace_back(ConsumerThread_BroadcastMessages);
+    return InitializeServerSocket();
 }
 
 #pragma endregion InitializationUtils
 
 #pragma region SocketTermination
 
-int TerminateServerApplication()
+int ShutdownSocketConnections()
 {
-    int ErrorCode = TerminateServerSocketConnection();
+    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown
+    // https://learn.microsoft.com/en-gb/windows/win32/winsock/graceful-shutdown-linger-options-and-socket-closure-2?redirectedfrom=MSDN
+    return shutdown(ServerData::ServerSocket, SD_BOTH);
+}
 
-    TerminateThreadJobs();
+int CloseSocketConnections()
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-closesocket
+    return closesocket(ServerData::ServerSocket);
+}
 
-    CleanupServerData();
+int TerminateWSA()
+{
+    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsacleanup
+    return WSACleanup();
+}
 
-    return ErrorCode;
+void TerminateThreadJobs()
+{
+    //for (int i = 0; i < ServerData::Producers.size(); ++i)
+    //{
+    //    ServerData::Producers[i].join();
+    //}
+    //
+    //for (int i = 0; i < ServerData::Consumers.size(); ++i)
+    //{
+    //    ServerData::Consumers[i].join();
+    //}
+}
+
+void CleanupServerData()
+{
 }
 
 int TerminateServerSocketConnection()
@@ -411,40 +426,15 @@ int TerminateServerSocketConnection()
     return NO_ERROR;
 }
 
-int ShutdownSocketConnections()
+int TerminateServerApplication()
 {
-    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown
-    // https://learn.microsoft.com/en-gb/windows/win32/winsock/graceful-shutdown-linger-options-and-socket-closure-2?redirectedfrom=MSDN
-    return shutdown(ServerData::ServerSocket, SD_BOTH);
-}
+    int ErrorCode = TerminateServerSocketConnection();
 
-int CloseSocketConnections()
-{
-    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-closesocket
-    return closesocket(ServerData::ServerSocket);
-}
+    TerminateThreadJobs();
 
-int TerminateWSA()
-{
-    // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsacleanup
-    return WSACleanup();
-}
+    CleanupServerData();
 
-void TerminateThreadJobs()
-{
-    //for (int i = 0; i < ServerData::Producers.size(); ++i)
-    //{
-    //    ServerData::Producers[i].join();
-    //}
-    //
-    //for (int i = 0; i < ServerData::Consumers.size(); ++i)
-    //{
-    //    ServerData::Consumers[i].join();
-    //}
-}
-
-void CleanupServerData()
-{
+    return ErrorCode;
 }
 
 #pragma endregion SocketTermination
@@ -525,6 +515,21 @@ int ReceiveData(SOCKET& SocketToWriteReceiveFrom, char* BufferToWriteTo)
 
 #pragma endregion ServerUtils
 
+#pragma region MessageParsing
+
+void ParseLoginMessageParameters(const char* ReadBuffer, std::vector<std::string>& ParsedResults)
+{
+    std::string Message = ReadBuffer;
+
+    int FirstDelimiter = Message.find('|', 0);
+    int SecondDelimiter = Message.find('|', FirstDelimiter + 1);
+
+    // Time To Chop Up The Message!
+    ParsedResults.push_back(Message.substr(0, FirstDelimiter));
+    ParsedResults.push_back(Message.substr(FirstDelimiter + 1, SecondDelimiter));
+    ParsedResults.push_back(Message.substr(SecondDelimiter + 1, Message.length() - SecondDelimiter));
+}
+
 bool ParseMessage(const char* ReadBuffer, std::vector<std::string>& ParsedResults)
 {
     char MessageHeader[3];
@@ -562,15 +567,4 @@ bool ParseMessage(const char* ReadBuffer, std::vector<std::string>& ParsedResult
     return false;
 }
 
-void ParseLoginMessageParameters(const char* ReadBuffer, std::vector<std::string>& ParsedResults)
-{
-    std::string Message = ReadBuffer;
-
-    int FirstDelimiter  = Message.find('|', 0);
-    int SecondDelimiter = Message.find('|', FirstDelimiter+1);
-
-    // Time To Chop Up The Message!
-    ParsedResults.push_back(Message.substr(0, FirstDelimiter));
-    ParsedResults.push_back(Message.substr(FirstDelimiter + 1, SecondDelimiter));
-    ParsedResults.push_back(Message.substr(SecondDelimiter + 1, Message.length() - SecondDelimiter));
-}
+#pragma endregion MessageParsing

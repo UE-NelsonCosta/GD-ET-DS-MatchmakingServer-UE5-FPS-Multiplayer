@@ -29,6 +29,9 @@
 // Dynamically linking of a lib file, you normally do this in your projects settings
 #pragma comment(lib, "ws2_32.lib")
 
+int  RunServerApplication();
+int  AcceptConnection();
+
 int main(int argc, char* argv[])
 {
 	int ErrorCode = 0;
