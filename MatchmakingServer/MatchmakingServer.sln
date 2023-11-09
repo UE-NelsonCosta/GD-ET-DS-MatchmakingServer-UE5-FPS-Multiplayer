@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34114.132
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatchmakingServer", "MatchmakingServer\MatchmakingServer.vcxproj", "{D46D08F6-5050-4687-B18D-238063DCDFE5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Debug|x64.ActiveCfg = Debug|x64
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Debug|x64.Build.0 = Debug|x64
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Debug|x86.ActiveCfg = Debug|Win32
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Debug|x86.Build.0 = Debug|Win32
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Release|x64.ActiveCfg = Release|x64
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Release|x64.Build.0 = Release|x64
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Release|x86.ActiveCfg = Release|Win32
+		{D46D08F6-5050-4687-B18D-238063DCDFE5}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B0C4363-3909-41EB-98E4-F27FB8F3BA61}
+	EndGlobalSection
+EndGlobal
