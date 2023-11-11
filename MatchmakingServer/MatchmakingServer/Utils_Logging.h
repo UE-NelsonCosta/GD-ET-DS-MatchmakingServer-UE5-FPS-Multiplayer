@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <WinSock2.h>
+#include <iomanip>
 
 int ParseLastWSAErrorToString(std::string& ErrorOutput)
 {
@@ -217,5 +218,7 @@ void LogMessage(const char* Message)
     ctime_s(dt, 64, &now);
 
     // TODO: Use A String Builder
-    std::cout << "[" << dt << "]: " << Message << std::endl;
+    auto time = std::time(nullptr);
+#pragma warning(suppress: 4996)
+    std::cout << "[" << std::put_time(std::gmtime(&time), "%F %T") << "]: " << Message << std::endl;
 }

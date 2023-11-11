@@ -118,6 +118,20 @@ uint32 FWorkerFindMatch::Run()
 	MatchFinderSubsystem->OnConnectionToMatchmakingServerSucceededEvent.Broadcast("Success!");
 
 	// TODO: Start Sending And Receiving Messages!
+	FString Message = "LGN|Nelson|Costa123";
+	char* result = TCHAR_TO_ANSI(*Message); // Ensure The Encoding Is Correct (UTF-16 to Byte Sized ANSI for C++)
+	int32 MessageLength = Message.Len();
+
+	int32 BytesSent = 0;
+	SocketToMatchmakingServer->Send((uint8*)result, MessageLength, BytesSent);
+
+	TArray<uint8> ReadBuffer;
+	ReadBuffer.AddUninitialized(1024);
+	int32 BytesRead = 0;
+	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 1024, BytesRead);
+
+	FString ServerMessage = (char*)ReadBuffer.GetData();
+	
 	
 	//FOnGameFound OnGameFoundEvent;
 

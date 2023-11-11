@@ -25,12 +25,15 @@
 
 #pragma once
 #include "Utils_Server.h"
+#include "Utils_MessageParsing.h"
 
 // Dynamically linking of a lib file, you normally do this in your projects settings
 #pragma comment(lib, "ws2_32.lib")
 
 int  RunServerApplication();
 int  AcceptConnection();
+void Thread_HandleClient(ClientConnection& Client);
+
 
 int main(int argc, char* argv[])
 {
@@ -78,6 +81,8 @@ int RunServerApplication()
 
 	while (ServerData::IsApplicationRunning)
 	{
+		//if(JoinAndCleanupCompletedThreads())
+
 		// Set This To Busy Waiting.
 		// TODO: Fix This Busy Waiting
 		if (!DoesServerDataHaveSpaceForAdditionalConnections())
@@ -136,10 +141,34 @@ int AcceptConnection()
 	LogMessage(OutputMessage.c_str());
 
 	// TODO: Launch Initial Chain Of Commands Through The Thread
+	ServerData::RunningJobs.emplace_back(Thread_HandleClient, std::ref(AvailableClientConnection));
 
 	return NO_ERROR;
 }
 
+void Thread_HandleClient(ClientConnection& Client)
+{
+	char InputBuffer[MessageBufferSize];
+	ZeroMemory(InputBuffer, MessageBufferSize);
+	// Receive Login Message
+	int size = ReceiveData(Client.ClientSocket, InputBuffer);
+
+	std::vector<std::string> ParsedMessage;
+	EClientMessageType MessageType = ParseMessage(InputBuffer, ParsedMessage);
+
+	if(MessageType != EClientMessageType::UKN)
+	{
+		
+		const char* Reply = "LGS";
+		SendData(Client.ClientSocket, Reply, 3);
+	}
+
+	// Send Result 
+
+	// Find A Session For The Player Or Pass Onto Other System
+
+
+}
 
 //// TODO: This should handle when the connection from the client dissapears more gracefully
 //void ProducerThread_ReadMessages(ClientConnection& ClientConnection)
