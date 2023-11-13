@@ -205,10 +205,6 @@ bool FWorkerFindMatch::HasValidPort(uint16 Port)
 bool FWorkerFindMatch::FormatIPv4StringToNumerics(FString& IP, TArray<uint8>& Output)
 {
 	CleanseIPOfInvalidCharacters(IP);
-
-
-
-	
 	
 	TArray<FString> SplitString;
 	IP.ParseIntoArray( SplitString, TEXT(".") );

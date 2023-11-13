@@ -146,7 +146,13 @@ int AcceptConnection()
 	return NO_ERROR;
 }
 
+// LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
 void Thread_HandleClient(ClientConnection& Client)
+{
+	HandleLoginMessage(Client);
+}
+
+void HandleLoginMessage(ClientConnection& Client)
 {
 	char InputBuffer[MessageBufferSize];
 	ZeroMemory(InputBuffer, MessageBufferSize);
@@ -156,18 +162,30 @@ void Thread_HandleClient(ClientConnection& Client)
 	std::vector<std::string> ParsedMessage;
 	EClientMessageType MessageType = ParseMessage(InputBuffer, ParsedMessage);
 
-	if(MessageType != EClientMessageType::UKN)
+	if (MessageType == EClientMessageType::LGN)
 	{
-		
-		const char* Reply = "LGS";
-		SendData(Client.ClientSocket, Reply, 3);
+		// TODO: Needs to a do an sql query to ensure the login is correct.
+
+		bool WasQuerySuccessful = true;
+		if (WasQuerySuccessful)
+		{
+			HandleSuccessfulLoginMessage();
+		}
 	}
 
-	// Send Result 
+	// Send Fail Message
+	const char* Reply = "LGF";
+	SendData(Client.ClientSocket, Reply, 3);
+	//HandleLoginMessage(Client);
+	CleanupClient();
+}
 
-	// Find A Session For The Player Or Pass Onto Other System
+void HandleSuccessfulLoginMessage()
+{
+	const char* Reply = "LGS";
+	SendData(Client.ClientSocket, Reply, 3);
 
-
+	// 
 }
 
 //// TODO: This should handle when the connection from the client dissapears more gracefully

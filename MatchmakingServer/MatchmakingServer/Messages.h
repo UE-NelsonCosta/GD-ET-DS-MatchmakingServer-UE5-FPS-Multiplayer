@@ -23,6 +23,13 @@
 * 
 **/
 
+// Fully Succesful Message Sequence Should Be
+
+// Message Origin:
+// 
+// Client Server	 Client Server	   Server Client
+// LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
+
 enum class EServerMessageType : int
 {
 	UKN = -1, // Unknown/Bad Message
