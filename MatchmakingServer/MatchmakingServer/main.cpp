@@ -24,26 +24,21 @@
 */
 
 #pragma once
-#include "Utils_Server.h"
-#include "Utils_MessageParsing.h"
 
-// Dynamically linking of a lib file, you normally do this in your projects settings
-#pragma comment(lib, "ws2_32.lib")
-
-int  RunServerApplication();
-int  AcceptConnection();
-void Thread_HandleClient(ClientConnection& Client);
-
+#include "ServerListenSocket/ServerListenSocket.h"
+#include "CommandlineParser/CommandlineParameterParser.h"
+#include "Utils/Logging.h"
 
 int main(int argc, char* argv[])
 {
 	int ErrorCode = 0;
+	ServerListenSocket ServerSocket;
 
 	// Parse Any Commandline Arguments Namely IP and Port To Connect To
-	ParseCommandlineArguments(argc, argv);
+	CommandlineParameterParser::Instance().ParseCommandlineArguments(argc, argv);
 
 	// If There Is An Error Somewhere That Code Should Handle It And Return Early
-	ErrorCode = InitializeServerApplication();
+	ErrorCode = ServerSocket.InitializeServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 		LogMessage("Failed To Initialize Server Application");
@@ -54,7 +49,7 @@ int main(int argc, char* argv[])
 
 
 	// Run Our Client Socket
-	ErrorCode = RunServerApplication();
+	ErrorCode = ServerSocket.RunServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 
@@ -62,7 +57,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Cleanup Client Socket As It Should Be Done Now
-	ErrorCode = TerminateServerApplication();
+	ErrorCode = ServerSocket.TerminateServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 		return ErrorCode;
@@ -74,119 +69,7 @@ int main(int argc, char* argv[])
 
 #pragma region RuntimeLogic
 
-int RunServerApplication()
-{
-	int ErrorCode = 0;
-	LogMessage("Accepting New Connections");
 
-	while (ServerData::IsApplicationRunning)
-	{
-		//if(JoinAndCleanupCompletedThreads())
-
-		// Set This To Busy Waiting.
-		// TODO: Fix This Busy Waiting
-		if (!DoesServerDataHaveSpaceForAdditionalConnections())
-		{
-			continue;
-		}
-
-		// Report The Error But Keep Searching For More Connections
-		ErrorCode = AcceptConnection();
-		if (ErrorCode != NO_ERROR)
-		{
-			int WSAErrorCode = LogWSAErrorToConsole();
-
-			// TODO: Maybe support WSAEINPROGRESS under certain circumstances
-			if (WSAErrorCode == WSAEWOULDBLOCK || WSAErrorCode == WSAECONNRESET || WSAErrorCode == WSAEINPROGRESS)
-			{
-				continue;
-			}
-
-			ServerData::IsApplicationRunning = false;
-		}
-	}
-
-	return NO_ERROR;
-}
-
-int AcceptConnection()
-{
-	int IndexOfAvailableSocket = GetIndexOfAvailableSocket();
-	if (IndexOfAvailableSocket == -1)
-	{
-		// Something odd happened here, are you messing up soething with threads clearing up sections of the array? :l
-		return SOCKET_ERROR;
-	}
-
-	// IMPORTANT NOTE:
-	// Keep an explicit reference instaed of object to ensure it doesn't copy and we write directly to the data in the array
-	ClientConnection& AvailableClientConnection = ServerData::ClientConnections[IndexOfAvailableSocket];
-	
-	SOCKET& IncommingConnection = AvailableClientConnection.ClientSocket;
-	SOCKADDR_IN Client_Address;
-	int ClientAddressSize = sizeof(Client_Address);
-
-	IncommingConnection = accept(ServerData::ServerSocket, (struct sockaddr*)&Client_Address, &ClientAddressSize);
-	if (IncommingConnection == INVALID_SOCKET)
-	{
-		return SOCKET_ERROR;
-	}
-
-	char addrstr[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(Client_Address.sin_addr), addrstr, INET_ADDRSTRLEN);
-
-	std::string OutputMessage;
-	OutputMessage += "Accepted Connection From:";
-	OutputMessage += addrstr;
-	LogMessage(OutputMessage.c_str());
-
-	// TODO: Launch Initial Chain Of Commands Through The Thread
-	ServerData::RunningJobs.emplace_back(Thread_HandleClient, std::ref(AvailableClientConnection));
-
-	return NO_ERROR;
-}
-
-// LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
-void Thread_HandleClient(ClientConnection& Client)
-{
-	HandleLoginMessage(Client);
-}
-
-void HandleLoginMessage(ClientConnection& Client)
-{
-	char InputBuffer[MessageBufferSize];
-	ZeroMemory(InputBuffer, MessageBufferSize);
-	// Receive Login Message
-	int size = ReceiveData(Client.ClientSocket, InputBuffer);
-
-	std::vector<std::string> ParsedMessage;
-	EClientMessageType MessageType = ParseMessage(InputBuffer, ParsedMessage);
-
-	if (MessageType == EClientMessageType::LGN)
-	{
-		// TODO: Needs to a do an sql query to ensure the login is correct.
-
-		bool WasQuerySuccessful = true;
-		if (WasQuerySuccessful)
-		{
-			HandleSuccessfulLoginMessage();
-		}
-	}
-
-	// Send Fail Message
-	const char* Reply = "LGF";
-	SendData(Client.ClientSocket, Reply, 3);
-	//HandleLoginMessage(Client);
-	CleanupClient();
-}
-
-void HandleSuccessfulLoginMessage()
-{
-	const char* Reply = "LGS";
-	SendData(Client.ClientSocket, Reply, 3);
-
-	// 
-}
 
 //// TODO: This should handle when the connection from the client dissapears more gracefully
 //void ProducerThread_ReadMessages(ClientConnection& ClientConnection)
@@ -244,19 +127,19 @@ void HandleSuccessfulLoginMessage()
 //		//std::cout << "Received Message From Client " << ClientID << " with Length: " << BytesReceived << " Bytes!" << std::endl;
 //
 //		// This is an example of soemthing we can save out later for analytics or just bookeeping
-//		ClientMessage& EmplacedClientMessage = ServerData::MessageHistory.emplace_back(ClientConnection.ClientID, SocketReadBuffer);
+//		ClientMessage& EmplacedClientMessage = MessageHistory.emplace_back(ClientConnection.ClientID, SocketReadBuffer);
 //
 //		// TODO: This Requires Locking
 //		// Let's place this into a nice little queue that our friend the consumer can use
-//		ServerData::ProducerConsumerDataLock.lock();
+//		ProducerConsumerDataLock.lock();
 //
-//		ServerData::ProducerDataToConsume.emplace(std::ref(EmplacedClientMessage));
+//		ProducerDataToConsume.emplace(std::ref(EmplacedClientMessage));
 //
-//		ServerData::ProducerConsumerDataLock.unlock();
+//		ProducerConsumerDataLock.unlock();
 //
 //		// Let's Notify That Lovable Nugget That He Needs To Get Back To Work
-//		std::lock_guard lock(ServerData::ConditionalVariableMutex);
-//		ServerData::ProducerToConsumerNotifier.notify_one();
+//		std::lock_guard lock(ConditionalVariableMutex);
+//		ProducerToConsumerNotifier.notify_one();
 //
 //	} while (true);
 //
@@ -269,30 +152,30 @@ void HandleSuccessfulLoginMessage()
 //	while (true)
 //	{
 //		// We Lock This Critical Section Right Off The Bat
-//		std::unique_lock ConsumerLock(ServerData::ConditionalVariableMutex);
+//		std::unique_lock ConsumerLock(ConditionalVariableMutex);
 //
 //		// We Want To Wait Right Off The Bat As Well, So We Release The Lock Till Notified As We Do Not Have Anything To Do Yet, So We Go To Sleep Until Told Otherwise
-//		ServerData::ProducerToConsumerNotifier.wait(ConsumerLock);
+//		ProducerToConsumerNotifier.wait(ConsumerLock);
 //		// Alternatively If We Can Have Data Already Ready To Be Processed, Let's Go Ahead And Give It A Proper Condition (Imagine You Can Load And Broadcast Older Messages)
-//		//ServerData::ProducerToConsumerNotifier.wait
+//		//ProducerToConsumerNotifier.wait
 //		//(
 //		//	ConsumerLock, 
 //		//	[]()
 //		//	{ 
-//		//		return ServerData::ProducerDataToConsume.size() > 0 ? true : false; 
+//		//		return ProducerDataToConsume.size() > 0 ? true : false; 
 //		//	} 
 //		//);
 //
-//		ServerData::ProducerConsumerDataLock.lock();
+//		ProducerConsumerDataLock.lock();
 //
-//		ClientMessage& MessageToSend = ServerData::ProducerDataToConsume.front();
-//		ServerData::ProducerDataToConsume.pop();
+//		ClientMessage& MessageToSend = ProducerDataToConsume.front();
+//		ProducerDataToConsume.pop();
 //
-//		ServerData::ProducerConsumerDataLock.unlock();
+//		ProducerConsumerDataLock.unlock();
 //
-//		for (int i = 0; i < ServerData::ClientConnections.size(); ++i)
+//		for (int i = 0; i < ClientConnections.size(); ++i)
 //		{
-//			SOCKET& ClientSocket = ServerData::ClientConnections[i].ClientSocket;
+//			SOCKET& ClientSocket = ClientConnections[i].ClientSocket;
 //			if (ClientSocket == 0)
 //			{
 //				continue;

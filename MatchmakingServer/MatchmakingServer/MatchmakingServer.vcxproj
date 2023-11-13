@@ -116,6 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,16 +140,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MatchmakingServer.cpp" />
+    <ClCompile Include="ClientConnection.cpp" />
+    <ClCompile Include="ClientMessageWorker.cpp" />
+    <ClCompile Include="CommandlineParser\CommandlineParameterParser.cpp" />
+    <ClCompile Include="GameSession.cpp" />
+    <ClCompile Include="GameSessionManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ServerListenSocket\ServerListenSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientThreadMessageChain.h" />
-    <ClInclude Include="Data.h" />
-    <ClInclude Include="Messages.h" />
+    <ClInclude Include="Utils\ASingleton.h" />
+    <ClInclude Include="ClientConnection.h" />
+    <ClInclude Include="ClientMessageWorker.h" />
+    <ClInclude Include="CommandlineParser\CommandlineParameterParser.h" />
+    <ClInclude Include="GameSession.h" />
+    <ClInclude Include="GameSessionManager.h" />
+    <ClInclude Include="Utils\Messages.h" />
     <ClInclude Include="ProjectMacros.h" />
-    <ClInclude Include="Utils_Logging.h" />
-    <ClInclude Include="Utils_MessageParsing.h" />
-    <ClInclude Include="Utils_Server.h" />
+    <ClInclude Include="ServerListenSocket\ServerListenSocket.h" />
+    <ClInclude Include="Utils\Logging.h" />
+    <ClInclude Include="Utils\MessageParsing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

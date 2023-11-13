@@ -5,7 +5,7 @@
 // Defines
 #define MaxSimultaneousConnections 128
 #define MaxPendingConnections 64  
-#define MessageBufferSize 1024
+#define MessageBufferSize 64
 
 // We Define The Supported Minimum and Maximum For Sockets
 // https://www.ibm.com/docs/en/ztpf/2021?topic=overview-port-numbers

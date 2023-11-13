@@ -3,7 +3,7 @@
 #include "Messages.h"
 #include <vector>
 #include <iostream>
-#include <minwinbase.h>
+//#include <minwinbase.h>
 
 #pragma region MessageParsing
 
@@ -38,7 +38,8 @@ void ParseRequestGamemode(const char* ReadBuffer, std::vector<std::string>& Pars
 EClientMessageType ConvertMessageHeaderToClientMessageType(const char* ReadBuffer)
 {
     char MessageHeader[4];
-    ZeroMemory(MessageHeader, 4);
+    // TODO: Revisit After Major Refactoring
+    //ZeroMemory(MessageHeader, 4);
     strncpy_s(MessageHeader, ReadBuffer, 3);
 
     if (strcmp(MessageHeader, "LGN") == 0)
