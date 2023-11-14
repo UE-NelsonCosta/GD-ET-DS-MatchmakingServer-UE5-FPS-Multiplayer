@@ -20,7 +20,7 @@ void CommandlineParameterParser::ParseCommandlineArguments(int argc, char* argv[
 			if (IsValidIPv4Address(CachedArgument))
 			{
 				// Override The IPAddress
-				ParsedConsoleParameters.insert({ "ServerIPAddress", CachedArgument });
+				ParsedConsoleParameters.insert({ "ServerIP", CachedArgument });
 			}
 		}
 

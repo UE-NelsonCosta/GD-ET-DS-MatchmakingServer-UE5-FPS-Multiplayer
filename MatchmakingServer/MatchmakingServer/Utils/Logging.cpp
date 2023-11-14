@@ -3,7 +3,6 @@
 #include <WinSock2.h>
 #include <iomanip>
 
-
 int ParseLastWSAErrorToString(std::string& ErrorOutput)
 {
     int LastError = WSAGetLastError();

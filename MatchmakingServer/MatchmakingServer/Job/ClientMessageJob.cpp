@@ -1,17 +1,18 @@
-#include "ClientMessageWorker.h"
-#include "ProjectMacros.h"
+#include "ClientMessageJob.h"
+#include "../ProjectMacros.h"
 //#include <minwinbase.h>
-#include "ClientConnection.h"
-#include "ServerListenSocket/ServerListenSocket.h"
-#include "Utils/MessageParsing.h"
-#include "GameSession.h"
+#include "../ClientConnection/ClientConnection.h"
+#include "../ServerListenSocket/ServerListenSocket.h"
+#include "../Utils/MessageParsing.h"
+#include "../GameSession/GameSessionManager.h"
+#include "../GameSession/GameSession.h"
 
 
-ClientMessageWorker::ClientMessageWorker(std::weak_ptr<ClientConnection> ClientConnection)
+ClientMessageJob::ClientMessageJob(std::weak_ptr<ClientConnection> ClientConnection)
 	: Client(ClientConnection)
 {}
 
-void ClientMessageWorker::Run()
+void ClientMessageJob::Run()
 {
 	// Starting Point, Thread Handles The Login Message In Here First Of Many
 	HandleLoginRequestMessage();
@@ -19,7 +20,7 @@ void ClientMessageWorker::Run()
 	CleanupClient();
 }
 
-inline void ClientMessageWorker::HandleLoginRequestMessage()
+inline void ClientMessageJob::HandleLoginRequestMessage()
 {
 	std::shared_ptr<ClientConnection> ClientConnection = Client.lock();
 
@@ -52,19 +53,19 @@ inline void ClientMessageWorker::HandleLoginRequestMessage()
 	HandleFailedLoginMessage();
 }
 
-inline void ClientMessageWorker::HandleSuccessfulLoginMessage()
+inline void ClientMessageJob::HandleSuccessfulLoginMessage()
 {
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, "LGS", 3);
 
 	HandleRequestGameMessage();
 }
 
-inline void ClientMessageWorker::HandleFailedLoginMessage()
+inline void ClientMessageJob::HandleFailedLoginMessage()
 {
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, "LGF", 3);
 }
 
-inline void ClientMessageWorker::HandleRequestGameMessage()
+inline void ClientMessageJob::HandleRequestGameMessage()
 {
 	std::shared_ptr<ClientConnection> ClientConnection = Client.lock();
 
@@ -89,19 +90,19 @@ inline void ClientMessageWorker::HandleRequestGameMessage()
 
 }
 
-inline void ClientMessageWorker::HandleSuccessfulRequestGameMessage()
+inline void ClientMessageJob::HandleSuccessfulRequestGameMessage()
 {
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, "RGS", 3);
 
 	HandleRequestGamemodeConnectionMessage();
 }
 
-inline void ClientMessageWorker::HandleFailedRequestGameMessage()
+inline void ClientMessageJob::HandleFailedRequestGameMessage()
 {
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, "RGF", 3);
 }
 
-inline void ClientMessageWorker::HandleRequestGamemodeConnectionMessage()
+inline void ClientMessageJob::HandleRequestGamemodeConnectionMessage()
 {
 	// Wait For Conditional Variable
 
@@ -114,7 +115,7 @@ inline void ClientMessageWorker::HandleRequestGamemodeConnectionMessage()
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, Message.c_str(), Message.length());
 }
 
-inline void ClientMessageWorker::CleanupClient()
+inline void ClientMessageJob::CleanupClient()
 {
 
 }

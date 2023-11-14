@@ -72,6 +72,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <SourcePath>$(SolutionDir);$(SourcePath)</SourcePath>
+    <OutDir>$(SolutionDir)\Binaries\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\Intermediate\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -140,22 +143,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ClientConnection.cpp" />
-    <ClCompile Include="ClientMessageWorker.cpp" />
+    <ClCompile Include="Job\AcceptConnectionJob.cpp" />
+    <ClCompile Include="ClientConnection\ClientConnection.cpp" />
+    <ClCompile Include="Job\ClientMessageJob.cpp" />
     <ClCompile Include="CommandlineParser\CommandlineParameterParser.cpp" />
-    <ClCompile Include="GameSession.cpp" />
-    <ClCompile Include="GameSessionManager.cpp" />
+    <ClCompile Include="GameSession\GameSession.cpp" />
+    <ClCompile Include="GameSession\GameSessionManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ProjectStatics.cpp" />
     <ClCompile Include="ServerListenSocket\ServerListenSocket.cpp" />
     <ClCompile Include="Utils\Logging.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Job\AcceptConnectionJob.h" />
+    <ClInclude Include="ProjectStatics.h" />
     <ClInclude Include="Utils\ASingleton.h" />
-    <ClInclude Include="ClientConnection.h" />
-    <ClInclude Include="ClientMessageWorker.h" />
+    <ClInclude Include="ClientConnection\ClientConnection.h" />
+    <ClInclude Include="Job\ClientMessageJob.h" />
     <ClInclude Include="CommandlineParser\CommandlineParameterParser.h" />
-    <ClInclude Include="GameSession.h" />
-    <ClInclude Include="GameSessionManager.h" />
+    <ClInclude Include="GameSession\GameSession.h" />
+    <ClInclude Include="GameSession\GameSessionManager.h" />
     <ClInclude Include="Utils\Messages.h" />
     <ClInclude Include="ProjectMacros.h" />
     <ClInclude Include="ServerListenSocket\ServerListenSocket.h" />

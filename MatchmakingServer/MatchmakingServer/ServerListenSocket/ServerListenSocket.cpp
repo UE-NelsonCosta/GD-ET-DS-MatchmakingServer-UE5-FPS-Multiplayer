@@ -1,6 +1,7 @@
 #include "ServerListenSocket.h"
 #include "../Utils/Logging.h"
 #include <ws2tcpip.h>
+#include "../CommandlineParser/CommandlineParameterParser.h"
 
 ServerListenSocket::ServerListenSocket()
 {
@@ -52,6 +53,10 @@ int ServerListenSocket::InitializeServerSocket()
 
 int ServerListenSocket::RunServerSocket()
 {
+    // TODO: Turn This Into A Thread
+    //AcceptConnectionsWorker = std::thread(this, &);
+
+
     int ErrorCode = 0;
     LogMessage("Accepting New Connections");
 
@@ -118,7 +123,18 @@ int ServerListenSocket::TerminateServerSocket()
 }
 
 void ServerListenSocket::InitializeServerData()
-{}
+{
+    CommandlineParameterParser& Parser = CommandlineParameterParser::Instance();
+
+    Parser.GetArgumentWithKey("ExecutionPath", ExecutionPath);
+
+    std::string Value;
+    Parser.GetArgumentWithKey("ServerIP", Value);
+    ServerIPAddress = std::wstring(Value.begin(), Value.end());
+
+    Parser.GetArgumentWithKey("ServerPort", Value);
+    ServerSocketPort = atoi(Value.c_str());
+}
 
 int ServerListenSocket::InitializeWSAStartup()
 {

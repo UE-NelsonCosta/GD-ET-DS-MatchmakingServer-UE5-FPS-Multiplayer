@@ -7,24 +7,19 @@ class ServerListenSocket;
 
 // Expected Message
 // LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
-class ClientMessageWorker
+class ClientMessageJob
 {
 public:
 
-	ClientMessageWorker(std::weak_ptr<ClientConnection> ClientConnection);
+	ClientMessageJob(std::weak_ptr<ClientConnection> ClientConnection);
 
 	void Run();
 
-	std::weak_ptr<ServerListenSocket> ServerSocket;
-	std::weak_ptr<ClientConnection> Client;
 	std::weak_ptr<GameSession> Session;
+	std::weak_ptr<ClientConnection> Client;
+	std::weak_ptr<ServerListenSocket> ServerSocket;
 
 private:
-
-
-
-
-
 
 	void HandleLoginRequestMessage();
 

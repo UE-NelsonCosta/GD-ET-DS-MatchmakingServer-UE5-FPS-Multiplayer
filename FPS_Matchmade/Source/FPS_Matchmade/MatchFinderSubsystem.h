@@ -65,13 +65,18 @@ public: // Public Functions
 
 public: // Events
 
+	UPROPERTY(BlueprintAssignable)
 	FOnConnectingToMatchmakingServerStarted OnConnectionToMatchmakingServerStartedEvent;
 	
+	UPROPERTY(BlueprintAssignable)
 	FOnConnectingToMatchmakingServerSucceeded OnConnectionToMatchmakingServerSucceededEvent;
+	UPROPERTY(BlueprintAssignable)
 	FOnConnectingToMatchmakingServerFailed OnConnectingToMatchmakingServerFailedEvent;
 
+	UPROPERTY(BlueprintAssignable)
 	FOnGameFound OnGameFoundEvent;
 
+	UPROPERTY(BlueprintAssignable)
 	FOnGameFindCanceled OnGameFindCanceledEvent;
 	
 private:

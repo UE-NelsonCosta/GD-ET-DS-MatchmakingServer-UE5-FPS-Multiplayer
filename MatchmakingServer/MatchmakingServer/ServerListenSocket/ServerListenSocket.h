@@ -1,3 +1,23 @@
+/**
+* 
+* Lifetime For Server Sockets Should Be Something Of The Sort
+*
+* Initialization:
+* WSAStartup: initiates the Winsock DLL;
+* socket: creates a socket that is bound to a transport service provider;  bind: associates a local address with a socket;
+* listen: sets the socket to listen mode to let it accept communications;
+*
+* Lifetime Communication:
+* accept: accept a connection
+* recv: receives data from a connected socket;
+* send: sends data on a connected socket;
+*
+* Termination:
+* closesocket: closes an existing socket;
+* WSACleanup: terminates use of the Winsock DLL.
+* 
+**/
+
 #pragma once
 
 // Dynamically linking of a lib file, you normally do this in your projects settings
@@ -8,7 +28,7 @@
 #include "../ProjectMacros.h"
 #include <thread>
 #include <mutex>
-#include "..\ClientConnection.h";
+#include "..\ClientConnection\ClientConnection.h";
 
 
 class ServerListenSocket
@@ -85,17 +105,17 @@ private: // Terminations
 
 
 
-
+private:
 
     // Declaring Defaults For Project
-    const char* DefaultExecutionPath = "";
-    const wchar_t* DefaultServerIPAddress = L"127.0.0.1";
+    const char*     DefaultExecutionPath = "";
+    const wchar_t*  DefaultServerIPAddress = L"127.0.0.1";
     const int		DefaultServerSocketPort = 42069;
 
     // Non Const And Overridable Runtime Variables, Using Standard Library Objects To Facilitate Usage
-    std::string		ExecutionPath = DefaultExecutionPath;
-    std::wstring	ServerIPAddress = DefaultServerIPAddress;
-    int				ServerSocketPort = DefaultServerSocketPort;
+    std::string		ExecutionPath       = DefaultExecutionPath;
+    std::wstring	ServerIPAddress     = DefaultServerIPAddress;
+    int				ServerSocketPort    = DefaultServerSocketPort;
 
     SOCKET			ServerSocket = 0;
     SOCKADDR_IN		ServerAddress;
@@ -106,5 +126,12 @@ private: // Terminations
     std::vector<std::thread> RunningJobs;
 
     bool IsApplicationRunning = true;
+
+
+
+private:    // Refactored Code
+
+    std::thread AcceptConnectionsWorker;
+    std::vector<std::thread> ClientMessageWorkers;
 };
 
