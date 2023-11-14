@@ -205,3 +205,11 @@ int ServerListenSocket::TerminateWSA()
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsacleanup
     return WSACleanup();
 }
+
+void ServerListenSocket::CleanupWorkers()
+{
+}
+
+void ServerListenSocket::CleanupServerData()
+{
+}

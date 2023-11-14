@@ -147,6 +147,7 @@
     <ClCompile Include="GameSessionManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ServerListenSocket\ServerListenSocket.cpp" />
+    <ClCompile Include="Utils\Logging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\ASingleton.h" />
