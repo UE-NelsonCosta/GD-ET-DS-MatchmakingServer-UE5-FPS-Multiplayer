@@ -1,0 +1,17 @@
+#pragma once
+
+#include <thread>
+
+// Interface For Job Objects These Should All Be Handled By The Main Thread
+class IThreadableJob
+{
+public:
+
+	virtual bool InitializeJob()	= 0;
+	virtual void RunJob()			= 0;
+	virtual void TerminateJob()		= 0;
+
+	std::thread Worker;
+
+};
+

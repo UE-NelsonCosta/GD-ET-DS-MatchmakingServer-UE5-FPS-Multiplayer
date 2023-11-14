@@ -32,10 +32,16 @@ void CommandlineParameterParser::ParseCommandlineArguments(int argc, char* argv[
 	}
 }
 
-void CommandlineParameterParser::GetArgumentWithKey(const std::string& Key, std::string& Output)
+bool CommandlineParameterParser::GetArgumentWithKey(const std::string& Key, std::string& Output)
 {
-	// TODO: Don't Use This As It Default Constructs, Change To Iterator In The Future 
-	Output = ParsedConsoleParameters[Key];
+	auto Result = ParsedConsoleParameters.find(Key);
+	if(Result != ParsedConsoleParameters.end())
+	{
+		Output = Result->second;
+		return true;
+	}
+
+	return false;
 }
 
 bool CommandlineParameterParser::CanStringBeConsideredAnIPv4Address(std::string& IPv4Address)

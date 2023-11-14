@@ -11,7 +11,7 @@ public:
 
 	void ParseCommandlineArguments(int argc, char* argv[]);
 
-	void GetArgumentWithKey(const std::string& Key, std::string& Output);
+    bool GetArgumentWithKey(const std::string& Key, std::string& Output);
 
 private: // Utility Functions
 

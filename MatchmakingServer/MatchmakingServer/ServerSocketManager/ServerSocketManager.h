@@ -25,17 +25,22 @@
 
 #include <WinSock2.h>
 #include <vector>
-#include "../ProjectMacros.h"
+#include <ProjectMacros.h>
 #include <thread>
 #include <mutex>
-#include "..\ClientConnection\ClientConnection.h";
+#include <ClientConnection/ClientConnection.h>
+#include <Job/AcceptConnectionJob.h>
+#include <Job/ClientMessageJob.h>
+#include <Utils/ASingleton.h>
 
 
-class ServerListenSocket
+class ServerSocketManager : public ASingleton<ServerSocketManager>
 {
+    friend class AcceptConnectionJob;
+
 public:
 
-    ServerListenSocket();
+    ServerSocketManager();
 
     int  InitializeServerSocket();
 
@@ -54,6 +59,8 @@ public:
         return recv(SocketToWriteReceiveFrom, BufferToWriteTo, MessageBufferSize, 0);
     }
 
+    void AddNewClientMessageHandler(std::weak_ptr<ClientConnection> Client);
+
 private: // Initialization
 
     void InitializeServerData();
@@ -61,11 +68,6 @@ private: // Initialization
     int  CreateServerSocket();
     int  BindSocketToAddress();
     int  SetSocketToListenState();
-
-private: // Run Server
-
-    // TODO: Should Probably Thread This, And Main Thread Should Unlock The Threads That Are Done Adding Data   
-    int AcceptConnection();
 
 private: // Terminations
 
@@ -75,41 +77,11 @@ private: // Terminations
     void CleanupWorkers();
     void CleanupServerData();
 
-
-
-
-
-    bool DoesServerDataHaveSpaceForAdditionalConnections()
-    {
-        for (int i = 0; i < ClientConnections.size(); ++i)
-        {
-            if (ClientConnections[i]->ClientSocket == 0)
-                return true;
-        }
-
-        return false;
-    }
-
-    int GetIndexOfAvailableSocket()
-    {
-        for (int i = 0; i < ClientConnections.size(); ++i)
-        {
-            if (ClientConnections[i]->ClientSocket == 0)
-                return i;
-        }
-
-        return -1;
-    }
-
-
-
-
-
 private:
 
     // Declaring Defaults For Project
-    const char*     DefaultExecutionPath = "";
-    const wchar_t*  DefaultServerIPAddress = L"127.0.0.1";
+    const char*     DefaultExecutionPath    = "";
+    const wchar_t*  DefaultServerIPAddress  = L"127.0.0.1";
     const int		DefaultServerSocketPort = 42069;
 
     // Non Const And Overridable Runtime Variables, Using Standard Library Objects To Facilitate Usage
@@ -121,17 +93,13 @@ private:
     SOCKADDR_IN		ServerAddress;
     WSADATA			WSASocketInformation;
 
-    // Macro Dictates How Many We Can Have Already Precreated, Never add to it
-    std::vector<std::shared_ptr<ClientConnection>>	ClientConnections;
-    std::vector<std::thread> RunningJobs;
-
-    bool IsApplicationRunning = true;
-
-
-
 private:    // Refactored Code
 
-    std::thread AcceptConnectionsWorker;
-    std::vector<std::thread> ClientMessageWorkers;
+    // Keeps Track Of All Connections
+    std::vector<std::shared_ptr<ClientConnection>>	ClientConnections;
+
+    // Keeps Track Of All Threads
+    std::shared_ptr<AcceptConnectionJob> ConnectionJob;
+    std::vector<std::shared_ptr<ClientMessageJob>> ClientMessageJobs;
 };
 

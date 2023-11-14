@@ -1,13 +1,13 @@
-#include "ServerListenSocket.h"
+#include "ServerSocketManager.h"
 #include "../Utils/Logging.h"
 #include <ws2tcpip.h>
 #include "../CommandlineParser/CommandlineParameterParser.h"
 
-ServerListenSocket::ServerListenSocket()
+ServerSocketManager::ServerSocketManager()
 {
 }
 
-int ServerListenSocket::InitializeServerSocket()
+int ServerSocketManager::InitializeServerSocket()
 {
     int ErrorCode = 0;
 
@@ -51,46 +51,17 @@ int ServerListenSocket::InitializeServerSocket()
     return NO_ERROR;
 }
 
-int ServerListenSocket::RunServerSocket()
+int ServerSocketManager::RunServerSocket()
 {
-    // TODO: Turn This Into A Thread
-    //AcceptConnectionsWorker = std::thread(this, &);
+    ConnectionJob = std::make_shared<AcceptConnectionJob>();
 
-
-    int ErrorCode = 0;
-    LogMessage("Accepting New Connections");
-
-    while (IsApplicationRunning)
-    {
-        //if(JoinAndCleanupCompletedThreads())
-
-        // Set This To Busy Waiting.
-        // TODO: Fix This Busy Waiting
-        if (!DoesServerDataHaveSpaceForAdditionalConnections())
-        {
-            continue;
-        }
-
-        // Report The Error But Keep Searching For More Connections
-        ErrorCode = AcceptConnection();
-        if (ErrorCode != NO_ERROR)
-        {
-            int WSAErrorCode = LogWSAErrorToConsole();
-
-            // TODO: Maybe support WSAEINPROGRESS under certain circumstances
-            if (WSAErrorCode == WSAEWOULDBLOCK || WSAErrorCode == WSAECONNRESET || WSAErrorCode == WSAEINPROGRESS)
-            {
-                continue;
-            }
-
-            IsApplicationRunning = false;
-        }
-    }
+    ConnectionJob->InitializeJob();
+    ConnectionJob->RunJob();
 
     return NO_ERROR;
 }
 
-int ServerListenSocket::TerminateServerSocket()
+int ServerSocketManager::TerminateServerSocket()
 {
     int ErrorCode = 0;
 
@@ -122,34 +93,46 @@ int ServerListenSocket::TerminateServerSocket()
     return ErrorCode;
 }
 
-void ServerListenSocket::InitializeServerData()
+void ServerSocketManager::AddNewClientMessageHandler(std::weak_ptr<ClientConnection> Client)
+{
+    std::shared_ptr<ClientMessageJob> NewClientMessageHandler = ClientMessageJobs.emplace_back(std::make_shared<ClientMessageJob>(Client));
+
+    NewClientMessageHandler->InitializeJob();
+    NewClientMessageHandler->RunJob();
+}
+
+void ServerSocketManager::InitializeServerData()
 {
     CommandlineParameterParser& Parser = CommandlineParameterParser::Instance();
 
     Parser.GetArgumentWithKey("ExecutionPath", ExecutionPath);
 
     std::string Value;
-    Parser.GetArgumentWithKey("ServerIP", Value);
-    ServerIPAddress = std::wstring(Value.begin(), Value.end());
+    if(Parser.GetArgumentWithKey("ServerIP", Value))
+    {
+        ServerIPAddress = std::wstring(Value.begin(), Value.end());
+    }
 
-    Parser.GetArgumentWithKey("ServerPort", Value);
-    ServerSocketPort = atoi(Value.c_str());
+    if(Parser.GetArgumentWithKey("ServerPort", Value))
+    {
+        ServerSocketPort = atoi(Value.c_str());
+    }
 }
 
-int ServerListenSocket::InitializeWSAStartup()
+int ServerSocketManager::InitializeWSAStartup()
 {
     // Intializes the WindowSocketApplication (WSA For Short) Just A DLL Process To Help With Everything
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup
     return WSAStartup(MAKEWORD(2, 0), &WSASocketInformation);
 }
 
-int ServerListenSocket::CreateServerSocket()
+int ServerSocketManager::CreateServerSocket()
 {
     ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     return ServerSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
 }
 
-int ServerListenSocket::BindSocketToAddress()
+int ServerSocketManager::BindSocketToAddress()
 {
     // Clear Out Server Socket Memory Then Fill In The Important Information
     ZeroMemory(&ServerAddress, sizeof(ServerAddress));
@@ -160,72 +143,35 @@ int ServerListenSocket::BindSocketToAddress()
     return bind(ServerSocket, (struct sockaddr*)&ServerAddress, sizeof(ServerAddress));
 }
 
-int ServerListenSocket::SetSocketToListenState()
+int ServerSocketManager::SetSocketToListenState()
 {
     //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
     return listen(ServerSocket, MaxPendingConnections);
 }
 
-int ServerListenSocket::AcceptConnection()
-{
-    int IndexOfAvailableSocket = GetIndexOfAvailableSocket();
-    if (IndexOfAvailableSocket == -1)
-    {
-        // Something odd happened here, are you messing up soething with threads clearing up sections of the array? :l
-        return SOCKET_ERROR;
-    }
-
-    // IMPORTANT NOTE:
-    // Keep an explicit reference instaed of object to ensure it doesn't copy and we write directly to the data in the array
-    const std::shared_ptr<ClientConnection>& AvailableClientConnection = ClientConnections[IndexOfAvailableSocket];
-
-    SOCKET& IncommingConnection = AvailableClientConnection->ClientSocket;
-    SOCKADDR_IN Client_Address;
-    int ClientAddressSize = sizeof(Client_Address);
-
-    IncommingConnection = accept(ServerSocket, (struct sockaddr*)&Client_Address, &ClientAddressSize);
-    if (IncommingConnection == INVALID_SOCKET)
-    {
-        return SOCKET_ERROR;
-    }
-
-    char addrstr[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(Client_Address.sin_addr), addrstr, INET_ADDRSTRLEN);
-
-    std::string OutputMessage;
-    OutputMessage += "Accepted Connection From:";
-    OutputMessage += addrstr;
-    LogMessage(OutputMessage.c_str());
-
-    // TODO: Now we need to convert this to use worker object instances
-    //RunningJobs.emplace_back(Thread_HandleClientMessageSequence, AvailableClientConnection);
-
-    return NO_ERROR;
-}
-
-int ServerListenSocket::ShutdownSocketConnections()
+int ServerSocketManager::ShutdownSocketConnections()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown
     // https://learn.microsoft.com/en-gb/windows/win32/winsock/graceful-shutdown-linger-options-and-socket-closure-2?redirectedfrom=MSDN
     return shutdown(ServerSocket, SD_BOTH);
 }
 
-int ServerListenSocket::CloseSocketConnections()
+int ServerSocketManager::CloseSocketConnections()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-closesocket
     return closesocket(ServerSocket);
 }
 
-int ServerListenSocket::TerminateWSA()
+int ServerSocketManager::TerminateWSA()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsacleanup
     return WSACleanup();
 }
 
-void ServerListenSocket::CleanupWorkers()
+void ServerSocketManager::CleanupWorkers()
 {
 }
 
-void ServerListenSocket::CleanupServerData()
+void ServerSocketManager::CleanupServerData()
 {
 }

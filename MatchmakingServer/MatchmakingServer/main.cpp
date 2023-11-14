@@ -10,24 +10,25 @@
 
 #pragma once
 
-#include "ServerListenSocket/ServerListenSocket.h"
-#include "CommandlineParser/CommandlineParameterParser.h"
-#include "Utils/Logging.h"
-#include "GameSession/GameSessionManager.h"
-#include "ProjectStatics.h"
+#include <ServerSocketManager/ServerSocketManager.h>
+#include <CommandlineParser/CommandlineParameterParser.h>
+#include <Utils/Logging.h>
+#include <GameSession/GameSessionManager.h>
+#include <ProjectStatics.h>
 
-int RunApplication(ServerListenSocket& ServerSocket);
+int RunApplication();
 
 int main(int argc, char* argv[])
 {
 	int ErrorCode = 0;
-	ServerListenSocket ServerSocket;
+
+	std::shared_ptr<ServerSocketManager> ServerSocket = ServerSocketManager::InstanceAsStrongPointer();
 
 	// Parse Any Commandline Arguments Namely IP and Port To Connect To
 	CommandlineParameterParser::Instance().ParseCommandlineArguments(argc, argv);
 
 	// If There Is An Error Somewhere That Code Should Handle It And Return Early
-	ErrorCode = ServerSocket.InitializeServerSocket();
+	ErrorCode = ServerSocket->InitializeServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 		LogMessage("Failed To Initialize Server Application");
@@ -37,14 +38,14 @@ int main(int argc, char* argv[])
 	LogMessage("Socket Intialization Complete");
 
 	// Run Our Client Socket
-	ErrorCode = RunApplication(ServerSocket);
+	ErrorCode = RunApplication();
 	if (ErrorCode != NO_ERROR)
 	{
 		return ErrorCode;
 	}
 
 	// Cleanup Client Socket As It Should Be Done Now
-	ErrorCode = ServerSocket.TerminateServerSocket();
+	ErrorCode = ServerSocket->TerminateServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 		return ErrorCode;
@@ -54,10 +55,10 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-int RunApplication(ServerListenSocket& ServerSocket)
+int RunApplication()
 {
 	// This runs a thread on the background that accepts all connections, firing new threads to handle each clients chain of function calls
-	int ErrorCode = ServerSocket.RunServerSocket();
+	int ErrorCode = ServerSocketManager::InstanceAsStrongPointer()->RunServerSocket();
 	if (ErrorCode != NO_ERROR)
 	{
 		return ErrorCode;
@@ -72,4 +73,6 @@ int RunApplication(ServerListenSocket& ServerSocket)
 
 		// Check up on state of threads that can be cleaned up
 	}
+
+	return 0;
 }

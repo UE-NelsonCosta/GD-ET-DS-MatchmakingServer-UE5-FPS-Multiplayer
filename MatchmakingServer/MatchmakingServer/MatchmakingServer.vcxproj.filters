@@ -24,7 +24,7 @@
     <ClCompile Include="Job\ClientMessageJob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerListenSocket\ServerListenSocket.cpp">
+    <ClCompile Include="ServerSocketManager\ServerSocketManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommandlineParser\CommandlineParameterParser.cpp">
@@ -65,7 +65,7 @@
     <ClInclude Include="Job\ClientMessageJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerListenSocket\ServerListenSocket.h">
+    <ClInclude Include="ServerSocketManager\ServerSocketManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommandlineParser\CommandlineParameterParser.h">
@@ -84,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProjectStatics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Job\IThreadableJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

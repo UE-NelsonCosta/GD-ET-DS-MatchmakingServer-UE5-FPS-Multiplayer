@@ -1,25 +1,29 @@
+// Expected Message
+// LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
+// TODO: Documentation
+
 #pragma once
 #include <memory>
+#include "IThreadableJob.h"
 
 class ClientConnection;
 class GameSession;
-class ServerListenSocket;
+class ServerSocketManager;
 
-// Expected Message
-// LGN -> LGS/LGF -> RGM -> RGS/RGF -> RGC -> CAK
-class ClientMessageJob
+class ClientMessageJob : public IThreadableJob
 {
 public:
 
+	ClientMessageJob() = delete;
 	ClientMessageJob(std::weak_ptr<ClientConnection> ClientConnection);
 
-	void Run();
+	virtual bool InitializeJob() override;
 
-	std::weak_ptr<GameSession> Session;
-	std::weak_ptr<ClientConnection> Client;
-	std::weak_ptr<ServerListenSocket> ServerSocket;
+	virtual void RunJob()		 override;
 
-private:
+	virtual void TerminateJob()  override;
+
+private: // Internal Functions
 
 	void HandleLoginRequestMessage();
 
@@ -35,7 +39,10 @@ private:
 
 	void HandleRequestGamemodeConnectionMessage();
 
-	void CleanupClient();
+private:
 
+	std::weak_ptr<GameSession> Session;
+	std::weak_ptr<ClientConnection> Client;
+	std::weak_ptr<ServerSocketManager> ServerSocket;
 };
 

@@ -83,6 +83,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)\Intermediate\$(Configuration)_$(Platform)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)$(ProjectName)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -153,10 +154,11 @@
     <ClCompile Include="GameSession\GameSessionManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ProjectStatics.cpp" />
-    <ClCompile Include="ServerListenSocket\ServerListenSocket.cpp" />
+    <ClCompile Include="ServerSocketManager\ServerSocketManager.cpp" />
     <ClCompile Include="Utils\Logging.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Job\IThreadableJob.h" />
     <ClInclude Include="Job\AcceptConnectionJob.h" />
     <ClInclude Include="ProjectStatics.h" />
     <ClInclude Include="Utils\ASingleton.h" />
@@ -167,7 +169,7 @@
     <ClInclude Include="GameSession\GameSessionManager.h" />
     <ClInclude Include="Utils\Messages.h" />
     <ClInclude Include="ProjectMacros.h" />
-    <ClInclude Include="ServerListenSocket\ServerListenSocket.h" />
+    <ClInclude Include="ServerSocketManager\ServerSocketManager.h" />
     <ClInclude Include="Utils\Logging.h" />
     <ClInclude Include="Utils\MessageParsing.h" />
   </ItemGroup>
