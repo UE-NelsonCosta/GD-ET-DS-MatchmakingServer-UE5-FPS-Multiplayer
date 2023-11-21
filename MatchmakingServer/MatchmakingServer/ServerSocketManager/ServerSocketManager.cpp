@@ -101,6 +101,19 @@ void ServerSocketManager::AddNewClientMessageHandler(std::weak_ptr<ClientConnect
     NewClientMessageHandler->RunJob();
 }
 
+void ServerSocketManager::RemoveClientConnection(std::weak_ptr<ClientConnection> Client)
+{
+    std::shared_ptr<ClientConnection> ObjectToFind = Client.lock();
+    for(auto iterator = ClientConnections.begin(); iterator !=  ClientConnections.end(); ++iterator)
+    {
+        if((*iterator) == ObjectToFind)
+        {
+            ClientConnections.erase(iterator);
+            return;
+        }
+    }
+}
+
 void ServerSocketManager::InitializeServerData()
 {
     CommandlineParameterParser& Parser = CommandlineParameterParser::Instance();

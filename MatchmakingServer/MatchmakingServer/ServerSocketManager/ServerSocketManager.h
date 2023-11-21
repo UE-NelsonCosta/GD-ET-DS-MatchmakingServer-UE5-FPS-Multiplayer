@@ -37,6 +37,7 @@
 class ServerSocketManager : public ASingleton<ServerSocketManager>
 {
     friend class AcceptConnectionJob;
+    friend int RunApplication();
 
 public:
 
@@ -60,6 +61,8 @@ public:
     }
 
     void AddNewClientMessageHandler(std::weak_ptr<ClientConnection> Client);
+
+    void RemoveClientConnection(std::weak_ptr<ClientConnection> Client);
 
 private: // Initialization
 
@@ -96,10 +99,13 @@ private:
 private:    // Refactored Code
 
     // Keeps Track Of All Connections
+    std::mutex ClientConnectionMutex;
     std::vector<std::shared_ptr<ClientConnection>>	ClientConnections;
 
     // Keeps Track Of All Threads
     std::shared_ptr<AcceptConnectionJob> ConnectionJob;
+
+    std::mutex ClientMessageJobMutex;
     std::vector<std::shared_ptr<ClientMessageJob>> ClientMessageJobs;
 };
 

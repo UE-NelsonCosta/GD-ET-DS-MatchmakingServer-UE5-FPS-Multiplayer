@@ -11,7 +11,17 @@ public:
 	virtual void RunJob()			= 0;
 	virtual void TerminateJob()		= 0;
 
+	virtual bool IsJobComplete() { return JobComplete; }
+	virtual bool WasJobSuccessful() { return WasSuccessful; }
+
+public:
+
 	std::thread Worker;
+
+protected:
+
+	bool JobComplete = false;
+	bool WasSuccessful = true;
 
 };
 

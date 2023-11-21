@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 static int GameSessionIDTracker = 0;
 
@@ -9,6 +10,8 @@ class ClientConnection;
 
 class GameSession
 {
+    friend class ClientMessageJob;
+
 public:
 
     GameSession(std::string& ServerAddressForSession, std::string& ServerPortForSession);
@@ -24,8 +27,11 @@ public:
 private:
     int SessionID;
 
-    std::string ServerAddress;
-    std::string ServerPort;
+    std::string UEServerAddress;
+    std::string UEServerPort;
+
+    std::mutex WorkerThreadLock;
+    std::condition_variable CV_AwaitGameSessionFill;
 
     // Note This Just Cares About All Clients, If you Want To Split Them Into Teams MMR Etc Decide How This Should Work Or Have Other Vectors With That Data
     std::vector<std::weak_ptr<ClientConnection>> SessionClients;

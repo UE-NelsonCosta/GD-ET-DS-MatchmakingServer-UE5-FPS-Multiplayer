@@ -69,9 +69,21 @@ int RunApplication()
 	{
 		// Check State Of Game Sessions And Launch Unreal Server Instances
 		// Note: This version generally fires and forgets instances, you can control these if you intend to do so or reuse server instances
-		GameSessionManager::Instance().Run();
+		GameSessionManager::Instance().Run(); 
 
 		// Check up on state of threads that can be cleaned up
+		auto ClientJobs = ServerSocketManager::Instance().ClientMessageJobs;
+		for(auto iterator = ClientJobs.begin(); iterator != ClientJobs.end(); ++iterator)
+		{
+			std::shared_ptr<ClientMessageJob> CurrentClientJob = *iterator;
+			// If This Thread Has Completed It's Task Clean It Up As Well As It's Client Connection
+			if(CurrentClientJob->IsJobComplete())
+			{
+				ServerSocketManager::Instance().RemoveClientConnection(CurrentClientJob->GetClientConnection());
+				CurrentClientJob->Worker.join();
+				iterator = ClientJobs.erase(iterator);
+			}
+		}
 	}
 
 	return 0;

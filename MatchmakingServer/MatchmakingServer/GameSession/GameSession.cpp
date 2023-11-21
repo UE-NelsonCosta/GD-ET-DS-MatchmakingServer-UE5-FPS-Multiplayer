@@ -2,8 +2,8 @@
 
 GameSession::GameSession(std::string& ServerAddressForSession, std::string& ServerPortForSession)
     : SessionID(++GameSessionIDTracker)
-    , ServerAddress(ServerAddressForSession)
-    , ServerPort(ServerPortForSession)
+    , UEServerAddress(ServerAddressForSession)
+    , UEServerPort(ServerPortForSession)
 {}
 
 bool GameSession::IsGameSessionFull()
@@ -19,12 +19,12 @@ int GameSession::GetSessionID()
 
 std::string GameSession::GetServerAddress()
 {
-    return ServerAddress;
+    return UEServerAddress;
 }
 
 std::string GameSession::GetServerPort()
 {
-    return ServerPort;
+    return UEServerPort;
 }
 
 void GameSession::AddClientConnectionToGameSession(std::weak_ptr<ClientConnection> ClientConnection)

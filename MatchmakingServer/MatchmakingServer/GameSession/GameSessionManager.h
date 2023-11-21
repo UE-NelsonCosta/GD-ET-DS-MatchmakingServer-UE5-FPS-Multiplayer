@@ -9,9 +9,11 @@ public:
 
 	void Run();
 
+	std::weak_ptr<GameSession> RegisterClientToGameSession(std::weak_ptr<ClientConnection> Client);
 
 private:
 
+	//std::mutex SessionMutex;
 	std::vector<std::shared_ptr<GameSession>> GameSessions;
 
 };
