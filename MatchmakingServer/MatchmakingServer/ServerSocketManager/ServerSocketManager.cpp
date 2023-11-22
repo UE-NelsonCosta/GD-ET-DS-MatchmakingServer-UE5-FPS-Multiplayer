@@ -95,6 +95,8 @@ int ServerSocketManager::TerminateServerSocket()
 
 void ServerSocketManager::AddNewClientMessageHandler(std::weak_ptr<ClientConnection> Client)
 {
+    std::scoped_lock DataLock(ServerSocketManager::Instance().ClientMessageJobMutex);
+
     std::shared_ptr<ClientMessageJob> NewClientMessageHandler = ClientMessageJobs.emplace_back(std::make_shared<ClientMessageJob>(Client));
 
     NewClientMessageHandler->InitializeJob();

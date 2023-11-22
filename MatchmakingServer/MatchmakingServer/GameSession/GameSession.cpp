@@ -12,6 +12,16 @@ bool GameSession::IsGameSessionFull()
     return SessionClients.size() == SessionMaxPlayers;
 }
 
+bool GameSession::IsGameServerReady()
+{
+    return IsServerReady;
+}
+
+bool GameSession::IsGameSessionReadyToBeLaunched()
+{
+    return IsGameSessionFull() && IsGameServerReady();
+}
+
 int GameSession::GetSessionID()
 {
     return SessionID;

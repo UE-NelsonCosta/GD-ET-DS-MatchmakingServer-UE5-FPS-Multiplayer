@@ -129,12 +129,13 @@ void ClientMessageJob::HandleRequestGamemodeConnectionMessage()
 	std::unique_lock<std::mutex> Lock(GameSession->WorkerThreadLock);
 
 	// TODO: Check to see if this predicate is enough to send them all off and finalize their connection messages
-	GameSession->CV_AwaitGameSessionFill.wait(Lock, [GameSession]() { return GameSession->IsGameSessionFull(); } );
+	GameSession->CV_AwaitGameSessionFill.wait(Lock, [GameSession]() { return GameSession->IsGameSessionReadyToBeLaunched(); } );
 
 	// This should only happen when a thread that checks the state of game sessions decides that session is good to go.
 	std::string Message;
 	Message += "RGC|";
 	Message += Session.lock()->GetServerAddress();
+	Message += "|";
 	Message += Session.lock()->GetServerPort();
 
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, Message.c_str(), Message.length());

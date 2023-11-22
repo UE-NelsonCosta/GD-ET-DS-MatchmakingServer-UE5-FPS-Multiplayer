@@ -72,17 +72,30 @@ int RunApplication()
 		GameSessionManager::Instance().Run(); 
 
 		// Check up on state of threads that can be cleaned up
-		auto ClientJobs = ServerSocketManager::Instance().ClientMessageJobs;
+		// Note: Was using auto previously, but it was causing a copy of this vector, which resulted in erroneous data! Try not use autos!
+		std::scoped_lock DataLock(ServerSocketManager::Instance().ClientMessageJobMutex);
+		std::vector<std::shared_ptr<ClientMessageJob>>& ClientJobs = ServerSocketManager::Instance().ClientMessageJobs;
 		for(auto iterator = ClientJobs.begin(); iterator != ClientJobs.end(); ++iterator)
 		{
 			std::shared_ptr<ClientMessageJob> CurrentClientJob = *iterator;
+
+			if(!CurrentClientJob)
+			{
+				iterator = ClientJobs.erase(iterator);
+				continue;
+			}
+
 			// If This Thread Has Completed It's Task Clean It Up As Well As It's Client Connection
 			if(CurrentClientJob->IsJobComplete())
 			{
 				ServerSocketManager::Instance().RemoveClientConnection(CurrentClientJob->GetClientConnection());
 				CurrentClientJob->Worker.join();
 				iterator = ClientJobs.erase(iterator);
+				continue;
 			}
+
+			// Check The State Of The Socket Connection (recv with msg_peek)
+			//if(CurrentClientJob)
 		}
 	}
 

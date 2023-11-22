@@ -17,6 +17,8 @@ public:
     GameSession(std::string& ServerAddressForSession, std::string& ServerPortForSession);
 
     bool IsGameSessionFull();
+    bool IsGameServerReady();
+    bool IsGameSessionReadyToBeLaunched();
 
     int         GetSessionID();
     std::string GetServerAddress();
@@ -29,6 +31,7 @@ private:
 
     std::string UEServerAddress;
     std::string UEServerPort;
+    bool IsServerReady;
 
     std::mutex WorkerThreadLock;
     std::condition_variable CV_AwaitGameSessionFill;
@@ -38,35 +41,3 @@ private:
 
     const int SessionMaxPlayers = 2;
 };
-
-
-
-//std::shared_ptr<GameSession> FindAndAddClientToGameSession(const std::shared_ptr<ClientConnection>& Client)
-//{
-//    // We Kinda Just fill These as we go
-//    std::scoped_lock ScopedLock(GameSessionMutex);
-//
-//    std::shared_ptr<GameSession> GameSessionJoined;
-//
-//    // Search For An Available One
-//    for (int i = 0; i < GameSessions.size(); ++i)
-//    {
-//        GameSessionJoined = GameSessions[i];
-//
-//        if (GameSessionJoined.get() && !GameSessionJoined->IsGameSessionFull())
-//        {
-//            GameSessionJoined->SessionClients.push_back(Client);
-//        }
-//    }
-//
-//    // If none found lets make one! :D
-//    if (!GameSessionJoined.get())
-//    {
-//        GameSessionJoined = std::make_shared<GameSession>();
-//        GameSessions.emplace_back(std::move(GameSessionJoined));
-//
-//        GameSessionJoined->SessionClients.push_back(Client);
-//    }
-//
-//    return GameSessionJoined;
-//}

@@ -16,6 +16,7 @@ public:
 
 	ClientMessageJob() = delete;
 	ClientMessageJob(std::weak_ptr<ClientConnection> ClientConnection);
+	~ClientMessageJob(){}
 
 	virtual bool InitializeJob() override;
 
@@ -40,7 +41,6 @@ private: // Internal Functions
 	void HandleFailedRequestGameMessage();
 
 	void HandleRequestGamemodeConnectionMessage();
-
 
 private:
 
