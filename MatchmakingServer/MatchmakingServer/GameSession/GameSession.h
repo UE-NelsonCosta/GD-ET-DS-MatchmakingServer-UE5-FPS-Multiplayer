@@ -14,7 +14,7 @@ class GameSession
 
 public:
 
-    GameSession(std::string& ServerAddressForSession, std::string& ServerPortForSession);
+    GameSession(std::string ServerAddressForSession, std::string ServerPortForSession);
 
     bool IsGameSessionFull();
     bool IsGameServerReady();
@@ -31,7 +31,7 @@ private:
 
     std::string UEServerAddress;
     std::string UEServerPort;
-    bool IsServerReady;
+    bool IsServerReady = false;
 
     std::mutex WorkerThreadLock;
     std::condition_variable CV_AwaitGameSessionFill;

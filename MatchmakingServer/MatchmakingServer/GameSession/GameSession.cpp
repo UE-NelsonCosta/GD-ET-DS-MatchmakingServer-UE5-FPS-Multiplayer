@@ -1,6 +1,6 @@
 #include "GameSession.h"
 
-GameSession::GameSession(std::string& ServerAddressForSession, std::string& ServerPortForSession)
+GameSession::GameSession(std::string ServerAddressForSession, std::string ServerPortForSession)
     : SessionID(++GameSessionIDTracker)
     , UEServerAddress(ServerAddressForSession)
     , UEServerPort(ServerPortForSession)

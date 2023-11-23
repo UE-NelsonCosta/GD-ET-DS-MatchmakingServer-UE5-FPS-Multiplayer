@@ -117,23 +117,25 @@ uint32 FWorkerFindMatch::Run()
 
 	MatchFinderSubsystem->OnConnectionToMatchmakingServerSucceededEvent.Broadcast("Success!");
 
-	// TODO: Start Sending And Receiving Messages!
-	FString Message = "LGN|Nelson|Costa123";
-	char* result = TCHAR_TO_ANSI(*Message); // Ensure The Encoding Is Correct (UTF-16 to Byte Sized ANSI for C++)
-	int32 MessageLength = Message.Len();
+	SendLoginData();
+	if(!ReceiveLoginReply())
+	{
+		return 5;
+	}
 
-	int32 BytesSent = 0;
-	SocketToMatchmakingServer->Send((uint8*)result, MessageLength, BytesSent);
+	SendGamemodeRequest();
+	if(!ReceiveGamemodeReply())
+	{
+		return 6;
+	}
 
-	TArray<uint8> ReadBuffer;
-	ReadBuffer.AddUninitialized(1024);
-	int32 BytesRead = 0;
-	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 1024, BytesRead);
-
-	FString ServerMessage = (char*)ReadBuffer.GetData();
+	FString IPnPort;
+	if(!ReceiveGamemodeConnection(IPnPort))
+	{
+		return 7;
+	}
 	
-	
-	//FOnGameFound OnGameFoundEvent;
+	MatchFinderSubsystem->OnGameFoundEvent.Broadcast(IPnPort, "");
 
 	return 0;
 }
@@ -200,6 +202,88 @@ bool FWorkerFindMatch::IsConsideredAValidIP(const TArray<uint8>& IPValues)
 bool FWorkerFindMatch::HasValidPort(uint16 Port)
 {
 	return Port >= 1024 && Port <= 65535;
+}
+
+void FWorkerFindMatch::SendLoginData()
+{
+	// TODO: Start Sending And Receiving Messages!
+	FString Message = "LGN|Nelson|Costa123";
+	int32 MessageLength = Message.Len();
+	char* Payload = TCHAR_TO_ANSI(*Message); // Ensure The Encoding Is Correct (From UTF-16 to Byte Sized ANSI for C++)
+
+	int32 BytesSent = 0;
+	SocketToMatchmakingServer->Send((uint8*)Payload, MessageLength, BytesSent);
+}
+
+bool FWorkerFindMatch::ReceiveLoginReply()
+{
+	// Let's Read Some Data TO Confirm If The Login Was Successful or not
+	TArray<uint8> ReadBuffer;
+	ReadBuffer.AddUninitialized(32);
+	
+	int32 BytesRead = 0;
+	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
+
+	FString ServerMessage = ANSI_TO_TCHAR( (char*)ReadBuffer.GetData() ); // Convert To UTF-16 Encoding
+	if(ServerMessage.Find(TEXT("LGS")) == 0)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+void FWorkerFindMatch::SendGamemodeRequest()
+{
+	// Let's Send The Message Back To Request A Game
+	// TODO: This 0 should be something related to some gamemode
+	FString Message = "RGM|0";
+	int32 MessageLength = Message.Len();
+	char* Payload = TCHAR_TO_ANSI(*Message); // Ensure The Encoding Is Correct (UTF-16 to Byte Sized ANSI for C++)
+
+	int32 RequestGameBytesSent = 0;
+	SocketToMatchmakingServer->Send((uint8*)Payload, MessageLength, RequestGameBytesSent);
+}
+
+bool FWorkerFindMatch::ReceiveGamemodeReply()
+{
+	TArray<uint8> ReadBuffer;
+	ReadBuffer.AddUninitialized(32);
+	
+	int32 BytesRead = 0;
+	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
+
+	FString ServerMessage = ANSI_TO_TCHAR( (char*)ReadBuffer.GetData() ); // Convert To UTF-16 Encoding
+	if(ServerMessage.Find(TEXT("RGS")) == 0)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+bool FWorkerFindMatch::ReceiveGamemodeConnection(FString& Output)
+{
+	TArray<uint8> ReadBuffer;
+	ReadBuffer.AddUninitialized(32);
+	
+	int32 BytesRead = 0;
+	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
+
+	FString ServerMessage = ANSI_TO_TCHAR( (char*)ReadBuffer.GetData() ); // Convert To UTF-16 Encoding
+
+	FString CommandType;
+	FString CommandParams;
+	ServerMessage.Split(ServerMessage, &CommandType, &CommandParams);
+	
+	if(CommandType.Equals( TEXT("RGC") ) )
+	{
+		Output = CommandParams;
+		
+		return true;
+	}
+	
+	return false;
 }
 
 bool FWorkerFindMatch::FormatIPv4StringToNumerics(FString& IP, TArray<uint8>& Output)

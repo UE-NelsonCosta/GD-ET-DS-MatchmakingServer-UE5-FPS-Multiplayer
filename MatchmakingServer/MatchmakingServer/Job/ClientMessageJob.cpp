@@ -135,8 +135,9 @@ void ClientMessageJob::HandleRequestGamemodeConnectionMessage()
 	std::string Message;
 	Message += "RGC|";
 	Message += Session.lock()->GetServerAddress();
-	Message += "|";
+	Message += ":";
 	Message += Session.lock()->GetServerPort();
+	// NOTE: You can just tack on extra params here to parse in UE
 
 	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, Message.c_str(), Message.length());
 

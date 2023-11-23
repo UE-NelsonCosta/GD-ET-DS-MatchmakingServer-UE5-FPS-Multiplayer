@@ -124,6 +124,17 @@ private: // Internal Functions
 
 	bool IsConsideredAValidIP(const TArray<uint8>& IPValues);
 	bool HasValidPort( uint16 Port );
+
+private: // SocketMessagingChain
+
+	void SendLoginData();
+	bool ReceiveLoginReply();
+
+	void SendGamemodeRequest();
+	bool ReceiveGamemodeReply();
+
+	bool ReceiveGamemodeConnection(FString& Output);
+	
 private: // Variables
 
 	// Create A 

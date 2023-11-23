@@ -13,7 +13,7 @@ public:
 
 private:
 
-	//std::mutex SessionMutex;
+	std::mutex SessionMutex;
 	std::vector<std::shared_ptr<GameSession>> GameSessions;
 
 };

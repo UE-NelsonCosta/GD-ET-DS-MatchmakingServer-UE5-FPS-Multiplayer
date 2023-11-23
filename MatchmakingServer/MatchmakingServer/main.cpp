@@ -70,6 +70,8 @@ int RunApplication()
 		// Check State Of Game Sessions And Launch Unreal Server Instances
 		// Note: This version generally fires and forgets instances, you can control these if you intend to do so or reuse server instances
 		GameSessionManager::Instance().Run(); 
+		
+		continue;
 
 		// Check up on state of threads that can be cleaned up
 		// Note: Was using auto previously, but it was causing a copy of this vector, which resulted in erroneous data! Try not use autos!
