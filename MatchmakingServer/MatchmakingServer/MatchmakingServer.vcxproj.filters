@@ -45,6 +45,12 @@
     <ClCompile Include="ProjectStatics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UEServerManager\UE5ServerManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UEServerManager\UEServerInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ProjectMacros.h">
@@ -87,6 +93,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Job\IThreadableJob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UEServerManager\UE5ServerManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UEServerManager\UEServerInstance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

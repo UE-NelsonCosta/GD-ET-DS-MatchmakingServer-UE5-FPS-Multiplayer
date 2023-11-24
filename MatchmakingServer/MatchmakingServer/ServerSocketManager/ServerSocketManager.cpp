@@ -123,12 +123,7 @@ void ServerSocketManager::InitializeServerData()
     Parser.GetArgumentWithKey("ExecutionPath", ExecutionPath);
 
     std::string Value;
-    if(Parser.GetArgumentWithKey("ServerIP", Value))
-    {
-        ServerIPAddress = std::wstring(Value.begin(), Value.end());
-    }
-
-    if(Parser.GetArgumentWithKey("ServerPort", Value))
+    if(Parser.GetArgumentWithKey("OverrideClientListenPort", Value))
     {
         ServerSocketPort = atoi(Value.c_str());
     }

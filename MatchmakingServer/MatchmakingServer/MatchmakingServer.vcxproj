@@ -155,12 +155,16 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ProjectStatics.cpp" />
     <ClCompile Include="ServerSocketManager\ServerSocketManager.cpp" />
+    <ClCompile Include="UEServerManager\UE5ServerManager.cpp" />
+    <ClCompile Include="UEServerManager\UEServerInstance.cpp" />
     <ClCompile Include="Utils\Logging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Job\IThreadableJob.h" />
     <ClInclude Include="Job\AcceptConnectionJob.h" />
     <ClInclude Include="ProjectStatics.h" />
+    <ClInclude Include="UEServerManager\UEServerInstance.h" />
+    <ClInclude Include="UEServerManager\UE5ServerManager.h" />
     <ClInclude Include="Utils\ASingleton.h" />
     <ClInclude Include="ClientConnection\ClientConnection.h" />
     <ClInclude Include="Job\ClientMessageJob.h" />

@@ -84,12 +84,10 @@ private:
 
     // Declaring Defaults For Project
     const char*     DefaultExecutionPath    = "";
-    const wchar_t*  DefaultServerIPAddress  = L"127.0.0.1";
-    const int		DefaultServerSocketPort = 42069;
+    const int		DefaultServerSocketPort = ClientListenSocketPort;
 
     // Non Const And Overridable Runtime Variables, Using Standard Library Objects To Facilitate Usage
     std::string		ExecutionPath       = DefaultExecutionPath;
-    std::wstring	ServerIPAddress     = DefaultServerIPAddress;
     int				ServerSocketPort    = DefaultServerSocketPort;
 
     SOCKET			ServerSocket = 0;

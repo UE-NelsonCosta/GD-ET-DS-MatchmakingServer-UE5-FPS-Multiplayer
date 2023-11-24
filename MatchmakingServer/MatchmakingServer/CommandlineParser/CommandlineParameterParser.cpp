@@ -14,21 +14,11 @@ void CommandlineParameterParser::ParseCommandlineArguments(int argc, char* argv[
 	{
 		CachedArgument = argv[i];
 
-		// Let's Look for the IPv4 Address
-		if (CanStringBeConsideredAnIPv4Address(CachedArgument))
-		{
-			if (IsValidIPv4Address(CachedArgument))
-			{
-				// Override The IPAddress
-				ParsedConsoleParameters.insert({ "ServerIP", CachedArgument });
-			}
-		}
+		int Seperator = CachedArgument.find("=");
 
-		// Let's Look For The Port
-		if (CanStringBeConsideredAPort(CachedArgument))
-		{
-			ParsedConsoleParameters.insert({ "ServerPort", CachedArgument });
-		}
+		std::string KeyValue = CachedArgument.substr(0, Seperator);
+		std::string ParamValue = CachedArgument.substr(Seperator+1, CachedArgument.size() - Seperator);
+		ParsedConsoleParameters.insert({ KeyValue, ParamValue });
 	}
 }
 
