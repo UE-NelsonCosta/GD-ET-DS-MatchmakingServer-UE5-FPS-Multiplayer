@@ -1,8 +1,6 @@
 #include "CommandlineParameterParser.h"
 
-#include "..\ProjectMacros.h"
-#include <WinSock2.h>
-#include <ws2tcpip.h>
+#include <ProjectMacros.h>
 
 void CommandlineParameterParser::ParseCommandlineArguments(int argc, char* argv[])
 {
@@ -32,28 +30,4 @@ bool CommandlineParameterParser::GetArgumentWithKey(const std::string& Key, std:
 	}
 
 	return false;
-}
-
-bool CommandlineParameterParser::CanStringBeConsideredAnIPv4Address(std::string& IPv4Address)
-{
-	// IP's have a basic minimum of 7 characters (0.0.0.0) with 3x '.' characters in it
-	return IPv4Address.length() >= 7 && std::count(IPv4Address.begin(), IPv4Address.end(), '.') == 3;
-}
-
-bool CommandlineParameterParser::IsValidIPv4Address(std::string& IPAddress)
-{
-	// Note: Stack Allocate This Temporary Object To Help Us Parse If This Is Valid Or Not, Gets Destroyed When Leaving The Scope
-	SOCKADDR_IN sa;
-	return inet_pton(AF_INET, IPAddress.c_str(), &(sa.sin_addr)) == 1;
-}
-
-bool CommandlineParameterParser::IsStringAValidIPv4Address(std::string& IPv4Address)
-{
-	return CanStringBeConsideredAnIPv4Address(IPv4Address) && IsValidIPv4Address(IPv4Address);
-}
-
-inline bool CommandlineParameterParser::CanStringBeConsideredAPort(std::string& IPv4Address)
-{
-	int value = std::atoi(IPv4Address.c_str());
-	return value >= MinimumSupportedSocketPort && value <= MaximumSupportedSocketPort;
 }

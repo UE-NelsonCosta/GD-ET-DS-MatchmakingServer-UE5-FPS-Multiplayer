@@ -14,12 +14,14 @@ class UEServerInstance
 {
 public:
 
-	UEServerInstance();
+	UEServerInstance(std::string OverrideMap = "\"\"");
 
 	int GetInstanceID();
 
-	void GetIP(std::string& IP);
-	void GetPort(std::string& Port);
+	// Returns Copies So They Dont Meddle With The Information In This Class
+	std::string GetIP();
+	std::string GetPort();
+	std::string GetOverrideMap();
 
 	EServerInstanceState GetServerInstanceState();
 	void SetServerInstanceState(EServerInstanceState NewState);
@@ -31,9 +33,14 @@ private:
 	std::string UEServerIP	 = "127.0.0.1";
 	std::string UEServerPort = "1337";
 
+	std::string OverrideMap; 
+
 	EServerInstanceState ServerInstanceState = EServerInstanceState::NONE;
 
+	// Note: Might be worth keeping track of the PID
+
 private: // Static ID Trakcing Nonsense
+
 	static int InstanceIDTracker;
 
 };
