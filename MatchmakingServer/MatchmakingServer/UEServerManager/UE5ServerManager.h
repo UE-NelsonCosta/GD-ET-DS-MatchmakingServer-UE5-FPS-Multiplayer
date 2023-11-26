@@ -4,6 +4,7 @@
 #include <memory>
 #include <UEServerManager/UEServerInstance.h>
 #include <Utils/ASingleton.h>
+#include <mutex>
 
 // Class that requests UE5 Engine Instances and Reserves An Engine For GameSession
 class UEServerManager : public ASingleton<UEServerManager>

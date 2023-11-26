@@ -7,7 +7,7 @@ class GameSessionManager : public ASingleton<GameSessionManager>
 {
 public:
 
-	void Run();
+	void ValidateStateOfGameSessions();
 
 	std::weak_ptr<GameSession> RegisterClientToGameSession(std::weak_ptr<ClientConnection> Client);
 

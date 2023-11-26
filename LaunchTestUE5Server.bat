@@ -1,4 +1,4 @@
-@echo off
+@echo on
 :: https://docs.unrealengine.com/4.26/en-US/ProductionPipelines/CommandLineArguments/
 
 :: This first part of pathing can be automated refer to the link below
@@ -9,7 +9,7 @@ set ServerBaseParameters=-server -log
 
 :: If you need to override, pass a parameter with the map when you execute this batch file
 :: This Should Be Configured To Where The Game Should Start, If It's a Single Gamemode you can set it up via the editor
-set OverrideInitialMap=%1%
+set OverrideInitialMap=%1
 
 :: We only need to configure a open port to use, as the IP is bound to 0.0.0.0 which means it can bind to whatever is available
 set Port=-port=7777

@@ -14,7 +14,7 @@ class UEServerInstance
 {
 public:
 
-	UEServerInstance(std::string OverrideMap = "\"\"");
+	UEServerInstance(std::string OverrideMap = "-");
 
 	int GetInstanceID();
 

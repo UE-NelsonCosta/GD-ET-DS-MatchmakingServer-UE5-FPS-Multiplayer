@@ -1,10 +1,13 @@
 #include "GameSession.h"
+#include <UEServerManager/UE5ServerManager.h>
 
 GameSession::GameSession(std::string ServerAddressForSession, std::string ServerPortForSession)
     : SessionID(++GameSessionIDTracker)
-    , UEServerAddress(ServerAddressForSession)
-    , UEServerPort(ServerPortForSession)
-{}
+{
+    GameSessionState = EGameSessionState::FindingPlayers;
+
+    ServerInstance = UEServerManager::Instance().ReserveServerInstance();
+}
 
 bool GameSession::IsGameSessionFull()
 {
@@ -14,7 +17,10 @@ bool GameSession::IsGameSessionFull()
 
 bool GameSession::IsGameServerReady()
 {
-    return IsServerReady;
+    if(ServerInstance.expired())
+        return false;
+
+    return ServerInstance.lock()->GetServerInstanceState() != EServerInstanceState::Running;
 }
 
 bool GameSession::IsGameSessionReadyToBeLaunched()
@@ -27,17 +33,41 @@ int GameSession::GetSessionID()
     return SessionID;
 }
 
-std::string GameSession::GetServerAddress()
+EGameSessionState GameSession::GetGameSessionState()
 {
-    return UEServerAddress;
+    return GameSessionState;
 }
 
-std::string GameSession::GetServerPort()
+void GameSession::SetGameSessionState(EGameSessionState NewState)
 {
-    return UEServerPort;
+    GameSessionState = NewState;
+
+    // TODO: Stick this in a better place
+    if(GameSessionState == EGameSessionState::InProgress)
+    {
+        CV_AwaitGameSessionFill.notify_all();
+    }
 }
 
-void GameSession::AddClientConnectionToGameSession(std::weak_ptr<ClientConnection> ClientConnection)
+// This Should Already Be Locked From The Previous Function
+bool GameSession::AddClientConnectionToGameSession(std::weak_ptr<ClientConnection> ClientConnection)
 {
     SessionClients.push_back(ClientConnection);
+
+    if(SessionClients.size() == SessionMaxPlayers)
+    {
+        GameSessionState = EGameSessionState::ReadyToLaunch;
+    }
+
+    return true;
+}
+
+std::weak_ptr<UEServerInstance> GameSession::GetServerInstance()
+{
+    return ServerInstance;
+}
+
+std::string GameSession::GetServerInstanceIPnPort()
+{
+    return ServerInstance.lock()->GetIP() + ":" + ServerInstance.lock()->GetPort();
 }

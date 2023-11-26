@@ -1,6 +1,6 @@
 :: Simple Batch File To Run All Batch Files
 :: Launch Server First To Give It Time To Launch
-start "" "%~dp0MatchmakingServer/Binaries/Debug_x64/MatchmakingServer.exe" 127.0.0.1 42069
+start "" "%~dp0MatchmakingServer/Binaries/Debug_x64/MatchmakingServer.exe"
 
 :: Launch Clients That Will Connect To The Server Through The Frontend
 :: https://ss64.com/nt/start.html

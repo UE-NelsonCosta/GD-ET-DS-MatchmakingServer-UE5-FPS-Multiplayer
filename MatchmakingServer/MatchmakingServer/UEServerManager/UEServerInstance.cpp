@@ -23,7 +23,7 @@ UEServerInstance::UEServerInstance(std::string OverrideMap)
 	// Note: For Simplicity Sake, We Just Say That An InstanceID Is The Same As It's Port, Technically This Should Be A
 	//		 longlong type so we can have a gajillion different ID's for each game we play. Helps keep track of what games
 	//		 did what and who was in them etc for data collection
-	UEServerPort = InstanceID;
+	UEServerPort = std::to_string(InstanceID);
 
 	ServerInstanceState = EServerInstanceState::Reserved;
 }

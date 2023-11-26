@@ -69,7 +69,7 @@ int RunApplication()
 	{
 		// Check State Of Game Sessions And Launch Unreal Server Instances
 		// Note: This version generally fires and forgets instances, you can control these if you intend to do so or reuse server instances
-		GameSessionManager::Instance().Run(); 
+		GameSessionManager::Instance().ValidateStateOfGameSessions();
 		
 		continue;
 

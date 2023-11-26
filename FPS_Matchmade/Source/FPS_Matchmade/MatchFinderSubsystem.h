@@ -91,7 +91,7 @@ private:
 	FString MatchmakingServerIP = "127.0.0.1";
 
 	UPROPERTY(Config)
-	uint16 MatchmakingServerPort = 42069;
+	uint16 MatchmakingServerPort = 2000;
 };
 
 //https://store.algosyntax.com/tutorials/unreal-engine/ue5-multithreading-with-frunnable-and-thread-workflow/

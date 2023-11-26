@@ -1,24 +1,31 @@
 #include "GameSessionManager.h"
+#include <UEServerManager/UE5ServerManager.h>
 
-void GameSessionManager::Run()
+void GameSessionManager::ValidateStateOfGameSessions()
 {
     // Check State Of GameSessions And Notify Those That Are Ready To Be Shipped Off!
     std::scoped_lock Lock(SessionMutex);
     for(int i = 0; i < GameSessions.size(); ++i)
     {
         std::shared_ptr<GameSession> CurrentGameSession = GameSessions[i];
-        if(CurrentGameSession && CurrentGameSession->IsGameSessionFull() && !CurrentGameSession->IsGameServerReady())
+        if(CurrentGameSession.get() && CurrentGameSession->GetGameSessionState() == EGameSessionState::ReadyToLaunch)
         {
             // Let's Launch The UE5 Game Server
             // Normally we would have a system just to handle what servers are available or not and creates one, for sake of simplicity for now, we just incrementing a single port
             // TODO: Also relative pathing is weird use absolutes as they are clearer
-            system("start /B \"\" \"../../../LaunchTestUE5Server.bat\" 1337");
+            if(UEServerManager::Instance().RunServer(CurrentGameSession->GetServerInstance()))
+            {
+                CurrentGameSession->SetGameSessionState(EGameSessionState::InProgress);
+            }
+            // TODO: Otherwise Try Again Later Or Disband And Remake The Session
         }
     }
 }
 
 std::weak_ptr<GameSession> GameSessionManager::RegisterClientToGameSession(std::weak_ptr<ClientConnection> Client)
 {
+    std::scoped_lock Lock(SessionMutex);
+
     // TODO: Lock this behind a scopedlock
     std::shared_ptr<GameSession> BestMatch;
     for(int i = 0; i < GameSessions.size(); ++i)

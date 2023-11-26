@@ -274,7 +274,7 @@ bool FWorkerFindMatch::ReceiveGamemodeConnection(FString& Output)
 
 	FString CommandType;
 	FString CommandParams;
-	ServerMessage.Split(ServerMessage, &CommandType, &CommandParams);
+	ServerMessage.Split(TEXT("|"), &CommandType, &CommandParams);
 	
 	if(CommandType.Equals( TEXT("RGC") ) )
 	{

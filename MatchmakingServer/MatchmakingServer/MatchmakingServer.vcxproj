@@ -153,15 +153,18 @@
     <ClCompile Include="GameSession\GameSession.cpp" />
     <ClCompile Include="GameSession\GameSessionManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Utils\NetworkingUtilities.cpp" />
     <ClCompile Include="ProjectStatics.cpp" />
     <ClCompile Include="ServerSocketManager\ServerSocketManager.cpp" />
     <ClCompile Include="UEServerManager\UE5ServerManager.cpp" />
     <ClCompile Include="UEServerManager\UEServerInstance.cpp" />
     <ClCompile Include="Utils\Logging.cpp" />
+    <ClCompile Include="Utils\StringUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Job\IThreadableJob.h" />
     <ClInclude Include="Job\AcceptConnectionJob.h" />
+    <ClInclude Include="Utils\NetworkingUtilities.h" />
     <ClInclude Include="ProjectStatics.h" />
     <ClInclude Include="UEServerManager\UEServerInstance.h" />
     <ClInclude Include="UEServerManager\UE5ServerManager.h" />
@@ -176,6 +179,7 @@
     <ClInclude Include="ServerSocketManager\ServerSocketManager.h" />
     <ClInclude Include="Utils\Logging.h" />
     <ClInclude Include="Utils\MessageParsing.h" />
+    <ClInclude Include="Utils\StringUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
