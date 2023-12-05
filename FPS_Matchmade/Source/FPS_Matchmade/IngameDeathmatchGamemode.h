@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "GameFramework/PlayerStart.h"
 #include "IngameDeathmatchGamemode.generated.h"
 
 /**
@@ -30,7 +31,7 @@ class FPS_MATCHMADE_API AIngameDeathmatchGamemode final : public AGameMode
 	 * @param	UniqueId				The unique id the player has passed to the server
 	 * @param	ErrorMessage			When set to a non-empty value, the player will be rejected using the error message set
 	 */
-	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage);
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 
 	/**
 	 * Called to login new players by creating a player controller, overridable by the game
@@ -56,9 +57,18 @@ class FPS_MATCHMADE_API AIngameDeathmatchGamemode final : public AGameMode
 	virtual void PostLogin(APlayerController* NewPlayer);
 
 
+	UPROPERTY()
+	ACharacter* TeamBluePawn;
 
+	UPROPERTY()
+	ACharacter* TeamRedPawn;
 
-
+	UPROPERTY()
+	TArray<APlayerStart*> BlueTeamSpawns;
+	
+	UPROPERTY()
+	TArray<APlayerStart*> RedTeamSpawns;
+	
 
 
 

@@ -22,6 +22,8 @@ void AIngameDeathmatchGamemode::PreLogin(const FString& Options, const FString& 
 	const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+
+	// Check The Login Tokens
 }
 
 APlayerController* AIngameDeathmatchGamemode::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal,
