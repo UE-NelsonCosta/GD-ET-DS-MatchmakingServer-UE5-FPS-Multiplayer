@@ -12,7 +12,7 @@ void CommandlineParameterParser::ParseCommandlineArguments(int argc, char* argv[
 	std::string ApplicationPath = argv[0];
 	std::replace(ApplicationPath.begin(), ApplicationPath.end(), '\\', '/');
 	
-	int Seperator = StringUtils::FindNOccurenceReverse(ApplicationPath, "/", 4);
+	int Seperator = StringUtils::FindNOccurenceReverse(ApplicationPath, "/", 1);
 	ParsedConsoleParameters.insert( {"ProjectBasePath", ApplicationPath.substr(0, Seperator+1)} );
 
 	std::string CachedArgument;

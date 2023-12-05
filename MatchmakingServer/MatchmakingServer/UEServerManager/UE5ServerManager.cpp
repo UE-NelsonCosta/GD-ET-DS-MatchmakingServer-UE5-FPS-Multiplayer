@@ -19,9 +19,15 @@ bool UEServerManager::RunServer(std::weak_ptr<UEServerInstance> ServerInstance)
     // Note: Building this the lazy way so I can Explain the "Step by Step Of THe Console Command" However this is a TERRIBLE way to do it due to all the allocations that happen
     std::string ProjectBasePath = "\"";
     CommandlineParameterParser::Instance().GetArgumentWithKey("ProjectBasePath", ProjectBasePath);
+
+    // Possible additions to the relative path, this is mostly for debugging purposes from visual studio, final version expects the batch file at its root 
+    // Check MatchmakingServer Project Properties -> Debugging -> Command Parameters
+    std::string RelativePathing;
+    CommandlineParameterParser::Instance().GetArgumentWithKey("UE5LauncherRelativePath", RelativePathing);
     
     std::string BatchFilePath = "\"";
     BatchFilePath += ProjectBasePath;
+    BatchFilePath += RelativePathing;
     BatchFilePath += "LaunchTestUE5Server.bat\"";
     
     std::string LaunchParameter;
