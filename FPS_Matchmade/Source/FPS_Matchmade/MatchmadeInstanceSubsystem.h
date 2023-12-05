@@ -23,7 +23,4 @@ public:
 
 	/** Implement this for deinitialization of instances of the system */
 	virtual void Deinitialize() {}
-
-	/** Overridden to check global network context */
-	virtual int32 GetFunctionCallspace(UFunction* Function, FFrame* Stack) override;
 };

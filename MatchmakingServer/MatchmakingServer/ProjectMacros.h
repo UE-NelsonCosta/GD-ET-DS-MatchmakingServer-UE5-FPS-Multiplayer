@@ -38,4 +38,8 @@
 #error Configuration Ill Formed, Please Ensure MinimumSupportedSocketPort < MaximumSupportedSocketPort
 #endif
 
+#if ( ClientListenSocketPort < MinimumSupportedSocketPort && ClientListenSocketPort > MaximumSupportedSocketPort )
+#error Configuration Ill Formed, Please Ensure ClientListenSocket is In The MinimumSupportedSocketPort and MaximumSupportedSocketPort Macro Range
+#endif
+
 #pragma endregion MacroValidation

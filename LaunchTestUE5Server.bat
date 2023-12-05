@@ -1,4 +1,4 @@
-@echo on
+@echo off
 :: https://docs.unrealengine.com/4.26/en-US/ProductionPipelines/CommandLineArguments/
 
 :: This first part of pathing can be automated refer to the link below
