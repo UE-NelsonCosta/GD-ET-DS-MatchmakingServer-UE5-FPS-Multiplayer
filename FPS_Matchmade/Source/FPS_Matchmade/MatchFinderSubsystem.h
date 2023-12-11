@@ -19,6 +19,8 @@ enum class EMatchFindingProgress : uint8
 	CreatingConnection,
 	LoggingIn,
 	RequestingGame,
+	Completed,
+	Failed
 };
 
 class FWorkerFindMatch;
@@ -63,6 +65,11 @@ public: // Public Functions
 	UFUNCTION(BlueprintPure)
 	EMatchFindingProgress GetMatchFindingProgress() const;
 
+private: // Private Functions
+
+	UFUNCTION()
+	void SlowTickFromTimerCallback();
+
 public: // Events
 
 	UPROPERTY(BlueprintAssignable)
@@ -92,6 +99,8 @@ private:
 
 	UPROPERTY(Config)
 	uint16 MatchmakingServerPort = 2000;
+
+	FTimerHandle SlowTickHandle;
 };
 
 //https://store.algosyntax.com/tutorials/unreal-engine/ue5-multithreading-with-frunnable-and-thread-workflow/
@@ -112,6 +121,11 @@ public:
 	virtual void Exit() override;
 
 	EMatchFindingProgress GetProgress() const;
+
+	// TODO: Clean this up
+	FString GetState(){return State;}
+
+	FString GetIPnPort() {return IPnPort;}
 	
 private: // Internal Functions
 
@@ -143,5 +157,9 @@ private: // Variables
 	EMatchFindingProgress MatchfindingProgress;
 
 	UMatchFinderSubsystem* MatchFinderSubsystem;
+
+	FString State;
+
+	FString IPnPort;
 	
 };

@@ -4,6 +4,7 @@
 #include "MatchFinderSubsystem.h"
 
 #include "Common/TcpSocketBuilder.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 
 #pragma region MatchFinderSubsystem
 
@@ -36,12 +37,24 @@ void UMatchFinderSubsystem::Deinitialize()
 
 void UMatchFinderSubsystem::RequestGame()
 {
+	if(WorkerThread.IsValid())
+	{
+		// TODO: Report Error
+	}
+	
 	if(!WorkerJob)
 	{
 		WorkerJob = MakeShared<FWorkerFindMatch>(this);
 	}
 
 	WorkerThread = MakeShareable(FRunnableThread::Create(WorkerJob.Get(), TEXT("MatchFinderThread")));
+
+	OnConnectionToMatchmakingServerStartedEvent.Broadcast();
+	
+	// Create A Repeating Timer So We Can Update The UI Over Time
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this, "SlowTickFromTimerCallback");
+	GetWorld()->GetTimerManager().SetTimer(SlowTickHandle, TimerDelegate, 0.25f, true);
 }
 
 void UMatchFinderSubsystem::CancelRequest()
@@ -60,6 +73,29 @@ EMatchFinderSubsystemState UMatchFinderSubsystem::GetCurrentState() const
 EMatchFindingProgress UMatchFinderSubsystem::GetMatchFindingProgress() const
 {
 	return WorkerJob.IsValid() ? WorkerJob->GetProgress() : EMatchFindingProgress::Idle;
+}
+
+void UMatchFinderSubsystem::SlowTickFromTimerCallback()
+{
+	// Let's Just Update The UI
+	// TODO: Time to stop rushing though and give these proper states to poll
+	// if logging in is the state
+	// MatchFinderSubsystem->OnConnectionToMatchmakingServerSucceededEvent.Broadcast("Success!");
+
+	
+	if(WorkerJob->GetProgress() == EMatchFindingProgress::Failed)
+	{
+		OnConnectingToMatchmakingServerFailedEvent.Broadcast(WorkerJob->GetState());
+		GetWorld()->GetTimerManager().ClearTimer(SlowTickHandle);
+		return;
+	}
+
+	if(WorkerJob->GetProgress() == EMatchFindingProgress::Failed)
+	{
+		OnGameFoundEvent.Broadcast(WorkerJob->GetIPnPort(), "");
+		GetWorld()->GetTimerManager().ClearTimer(SlowTickHandle);
+		return;
+	}
 }
 
 #pragma endregion MatchFinderSubsystem
@@ -86,56 +122,94 @@ void FWorkerFindMatch::Stop()
 	}
 }
 
+// TODO: Use Exit Codes?
 uint32 FWorkerFindMatch::Run()
 {
-	if(!MatchFinderSubsystem)
-		return 1;
+	State = "Connecting To Matchmaking Server";
+	MatchfindingProgress = EMatchFindingProgress::CreatingConnection;
 	
-	MatchFinderSubsystem->OnConnectionToMatchmakingServerStartedEvent.Broadcast();
+	if(!MatchFinderSubsystem)
+	{
+		State = "Bad Initalization, Missing Reference To Match Finder Subsystem";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
+		return 1;
+	}
+	
 
 	TArray<uint8> ParsedIPv4;
 	bool IsValidIP = FormatIPv4StringToNumerics(MatchFinderSubsystem->MatchmakingServerIP, ParsedIPv4);
 	bool IsValidPort = HasValidPort(MatchFinderSubsystem->MatchmakingServerPort);
 	if(!IsValidIP || !IsValidPort)
 	{
-		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Bad IP Given: Please Check Config File"));
+		State = "Bad IP Given: Please Check Config File";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 2;
 	}
 	
 	if(!CreateSocketObject(SocketToMatchmakingServer))
 	{
-		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Failed To Create Socket Object"));
+		State = "Failed To Create Socket Object";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 3;
 	}
 		
 	TSharedRef<FInternetAddr> MatchmakingServerAddress = CreateInternetAddressToMatchmakingServer(ParsedIPv4);	
 	if (!SocketToMatchmakingServer->Connect(MatchmakingServerAddress.Get()))
 	{
-		MatchFinderSubsystem->OnConnectingToMatchmakingServerFailedEvent.Broadcast(TEXT("Failed To Connect To MatchmakingServer With Given IP"));
+		State = "Failed To Connect To MatchmakingServer With Given IP";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 4;
 	}
 
-	MatchFinderSubsystem->OnConnectionToMatchmakingServerSucceededEvent.Broadcast("Success!");
+	// Note: Don't Do This In Real Life! This is Just So The Widget Can Update And Show You A Step By Step
+	FPlatformProcess::Sleep(2);
+
+	State = "Connected To Matchmaking Server ... Logging In";
+	MatchfindingProgress = EMatchFindingProgress::LoggingIn;
+
 
 	SendLoginData();
 	if(!ReceiveLoginReply())
 	{
+		State = "Failed To Login Please Try Again Later";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 5;
 	}
+	
+	FPlatformProcess::Sleep(2);
+	State = "Login Successful! ... Requesting Game!";
+	MatchfindingProgress = EMatchFindingProgress::RequestingGame;
 
 	SendGamemodeRequest();
 	if(!ReceiveGamemodeReply())
 	{
+		State = "Failed To Request Gamemode Please Try Again";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 6;
 	}
 
-	FString IPnPort;
+	FPlatformProcess::Sleep(2);
+	State = "Request Successful! ... Finding A Game!";
+
 	if(!ReceiveGamemodeConnection(IPnPort))
 	{
+		State = "Failed To Get Connection Message Please Try Again";
+		MatchfindingProgress = EMatchFindingProgress::Failed;
+
 		return 7;
 	}
 	
-	MatchFinderSubsystem->OnGameFoundEvent.Broadcast(IPnPort, "");
+	// Note: Don't Do This In Real Life! This is Just So The Widget Can Update And Show You A Step By Step
+	FPlatformProcess::Sleep(2);
+	State = "Found Gamemode! ... Connecting To Server";
+	MatchfindingProgress = EMatchFindingProgress::Completed;
+
 
 	return 0;
 }
