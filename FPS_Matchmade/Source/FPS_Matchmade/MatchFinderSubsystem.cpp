@@ -260,7 +260,8 @@ uint32 FWorkerFindMatch::Run()
 
 void FWorkerFindMatch::Exit()
 {
-	SocketToMatchmakingServer->Close();
+	if(SocketToMatchmakingServer)
+		SocketToMatchmakingServer->Close();
 }
 
 EMatchFindingProgress FWorkerFindMatch::GetProgress() const
