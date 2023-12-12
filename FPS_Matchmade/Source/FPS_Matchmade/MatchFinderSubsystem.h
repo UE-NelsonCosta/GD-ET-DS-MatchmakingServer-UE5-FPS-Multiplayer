@@ -116,7 +116,7 @@ class FWorkerFindMatch final : public FRunnable
 {
 public:
 
-	FWorkerFindMatch(const FString& MMServerIP, const uint8 MMServerPort)
+	FWorkerFindMatch(const FString& MMServerIP, const uint16 MMServerPort)
 		: MatchmakingServerIP(MMServerIP)
 		, MatchmakingServerPort(MMServerPort)
 		, MatchFindingProgress(EMatchFindingProgress::Idle)
