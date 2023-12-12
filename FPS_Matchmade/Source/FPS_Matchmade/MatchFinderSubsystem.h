@@ -5,6 +5,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "MatchFinderSubsystem.generated.h"
 
+// TODO: Move This To A Separate Header File
+// Auxiliary Enumerations
 UENUM(BlueprintType)
 enum class EMatchFinderSubsystemState : uint8
 {
@@ -19,19 +21,25 @@ enum class EMatchFindingProgress : uint8
 	CreatingConnection,
 	LoggingIn,
 	RequestingGame,
-	Completed,
-	Failed
+	
+	Complete,
+
+	ConnectionFailed,
+	LoginFailed,
+	FindingFailed,
 };
 
-class FWorkerFindMatch;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnConnectingToMatchmakingServerStarted);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerSucceeded, FString, Reason);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConnectingToMatchmakingServerFailed, FString, Reason);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameFound, FString, IPnPort, FString, AdditionalParams );
+// Event Declarations
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameFindStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameFindCanceled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameFound, FString, IPnPort, FString, AdditionalParams );
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameFindStateUpdate, FString, State);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMatchFindingFailed, FString, Reason);
+
+// Forward Declarations
+class FWorkerFindMatch;
 
 // NOTE: As this contains important variables to serialize such as where to connect to and port, we keep this data saved
 //		 in configuration files we can easily tweak, if changes are made in engine, they will be saved out, otherwise
@@ -42,9 +50,6 @@ class FPS_MATCHMADE_API UMatchFinderSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	// Break OOP For An Exception
-	friend class FWorkerFindMatch;
-	
 public: // Public Functions
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -70,21 +75,24 @@ private: // Private Functions
 	UFUNCTION()
 	void SlowTickFromTimerCallback();
 
-public: // Events
+	TSharedPtr<FWorkerFindMatch> GetOrMakeWorkerJob();
 
-	UPROPERTY(BlueprintAssignable)
-	FOnConnectingToMatchmakingServerStarted OnConnectionToMatchmakingServerStartedEvent;
+public: // Events
 	
 	UPROPERTY(BlueprintAssignable)
-	FOnConnectingToMatchmakingServerSucceeded OnConnectionToMatchmakingServerSucceededEvent;
+	FOnGameFindStarted OnGameFindStartedEvent;
+	
 	UPROPERTY(BlueprintAssignable)
-	FOnConnectingToMatchmakingServerFailed OnConnectingToMatchmakingServerFailedEvent;
+	FOnGameFindCanceled OnGameFindCanceledEvent;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnGameFound OnGameFoundEvent;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnGameFindCanceled OnGameFindCanceledEvent;
+	FOnGameFindStateUpdate OnGameFindStateUpdateEvent;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMatchFindingFailed OnOnMatchFindingFailedEvent;
 	
 private:
 
@@ -108,8 +116,13 @@ class FWorkerFindMatch final : public FRunnable
 {
 public:
 
-	FWorkerFindMatch(UMatchFinderSubsystem* Subsystem)
-		: MatchFinderSubsystem(Subsystem)
+	FWorkerFindMatch(const FString& MMServerIP, const uint8 MMServerPort)
+		: MatchmakingServerIP(MMServerIP)
+		, MatchmakingServerPort(MMServerPort)
+		, MatchFindingProgress(EMatchFindingProgress::Idle)
+		, State("")
+		, ResultIPnPort("")
+		, ResultParameters("")
 	{}
 
 	// Called From Caller Thread (This Case Main Thread)
@@ -119,13 +132,13 @@ public:
 	// Called From Threaded Job
 	virtual uint32 Run() override;
 	virtual void Exit() override;
-
+	
+	// Get A Copy Of A Result Or Progress
 	EMatchFindingProgress GetProgress() const;
 
-	// TODO: Clean this up
-	FString GetState(){return State;}
-
-	FString GetIPnPort() {return IPnPort;}
+	FString GetState()					{ return State;				}
+	FString GetIPnPort()				{ return ResultIPnPort;		}
+	FString GetAdditionalParameters()	{ return ResultParameters;	}
 	
 private: // Internal Functions
 
@@ -147,19 +160,18 @@ private: // SocketMessagingChain
 	void SendGamemodeRequest();
 	bool ReceiveGamemodeReply();
 
-	bool ReceiveGamemodeConnection(FString& Output);
+	bool ReceiveGamemodeConnection(FString& OutputIPnPort, FString& OutputParameters);
 	
 private: // Variables
 
-	// Create A 
+	// IP And Port To Matchmaking Server
+	FString MatchmakingServerIP = "127.0.0.1";
+	uint16  MatchmakingServerPort = 2000;
 	FSocket* SocketToMatchmakingServer = nullptr;
-	
-	EMatchFindingProgress MatchfindingProgress;
 
-	UMatchFinderSubsystem* MatchFinderSubsystem;
+	EMatchFindingProgress MatchFindingProgress;
 
 	FString State;
-
-	FString IPnPort;
-	
+	FString ResultIPnPort;
+	FString ResultParameters;
 };
