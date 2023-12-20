@@ -46,7 +46,7 @@ class FWorkerFindMatch;
 //		 in editor change them in PROJECTDIR\Saved\Config\WindowsEditor\MatchFinderSubsystem.ini
 //		 Worth noting this isn't a tracked file on github, so if you dont see it, just run the game once
 UCLASS(Config="MatchFinderSubsystem")
-class FPS_MATCHMADE_API UMatchFinderSubsystem : public UGameInstanceSubsystem
+class MATCHFINDER_API UMatchFinderSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 

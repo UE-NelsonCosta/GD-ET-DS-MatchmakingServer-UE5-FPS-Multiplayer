@@ -4,7 +4,7 @@
 :: This first part of pathing can be automated refer to the link below
 :: https://gist.github.com/Ji-Rath/5eadf6259c61e85ad5382f50023dcfeb
 set EditorLocation="C:\Program Files\Epic Games\UE_5.2\Engine\Binaries\Win64\UnrealEditor.exe"
-set UProjectLocation="%~dp0FPS_Matchmade\FPS_Matchmade.uproject"
+set UProjectLocation="%~dp0../../FPS_Matchmade\FPS_Matchmade.uproject"
 set ServerBaseParameters=-server -log
 
 :: If you need to override, pass a parameter with the map when you execute this batch file

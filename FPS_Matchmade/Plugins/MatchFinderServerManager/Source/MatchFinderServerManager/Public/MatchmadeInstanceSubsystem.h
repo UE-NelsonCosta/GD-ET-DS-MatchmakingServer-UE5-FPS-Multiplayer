@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class FPS_MATCHMADE_API UMatchmadeInstanceSubsystem : public UGameInstanceSubsystem
+class MATCHFINDERSERVERMANAGER_API UMatchmadeInstanceSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
