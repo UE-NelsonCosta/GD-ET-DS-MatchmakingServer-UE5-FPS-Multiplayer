@@ -335,7 +335,7 @@ bool FWorkerFindMatch::ReceiveLoginReply()
 {
 	// Let's Read Some Data TO Confirm If The Login Was Successful or not
 	TArray<uint8> ReadBuffer;
-	ReadBuffer.AddUninitialized(32);
+	ReadBuffer.AddZeroed(32);
 	
 	int32 BytesRead = 0;
 	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
@@ -364,7 +364,7 @@ void FWorkerFindMatch::SendGamemodeRequest()
 bool FWorkerFindMatch::ReceiveGamemodeReply()
 {
 	TArray<uint8> ReadBuffer;
-	ReadBuffer.AddUninitialized(32);
+	ReadBuffer.AddZeroed(32);
 	
 	int32 BytesRead = 0;
 	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
@@ -382,7 +382,7 @@ bool FWorkerFindMatch::ReceiveGamemodeReply()
 bool FWorkerFindMatch::ReceiveGamemodeConnection(FString& OutputIPnPort, FString& OutputParameters)
 {
 	TArray<uint8> ReadBuffer;
-	ReadBuffer.AddUninitialized(32);
+	ReadBuffer.AddZeroed(32);
 	
 	int32 BytesRead = 0;
 	SocketToMatchmakingServer->Recv(ReadBuffer.GetData(), 32, BytesRead);
