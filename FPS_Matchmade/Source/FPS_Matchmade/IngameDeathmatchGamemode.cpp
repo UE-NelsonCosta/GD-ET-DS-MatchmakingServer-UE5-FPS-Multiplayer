@@ -3,6 +3,8 @@
 
 #include "IngameDeathmatchGamemode.h"
 
+//#include "ServerInstanceSubsystem.h"
+
 #include "Kismet/GameplayStatics.h"
 
 
@@ -17,17 +19,17 @@ void AIngameDeathmatchGamemode::StartPlay()
 		return;
 	}
 	
-	UServerInstanceSubsystem* MatchMadeInstanceSubsystem = GameInstance->GetSubsystem<UServerInstanceSubsystem>();
-	if(MatchMadeInstanceSubsystem)
-	{
-		if(!ServerInstanceEventDelegate.IsBound())
-		{
-			ServerInstanceEventDelegate.BindUFunction(this , "OnReceivedClientConnectionData");
-		}
-		MatchMadeInstanceSubsystem->OnReceivedClientConnectionDataEvent.AddUnique(ServerInstanceEventDelegate);
-		
-		MatchMadeInstanceSubsystem->RequestClientDataFromMatchmakingServer();
-	}
+	//UServerInstanceSubsystem* MatchMadeInstanceSubsystem = GameInstance->GetSubsystem<UServerInstanceSubsystem>();
+	//if(MatchMadeInstanceSubsystem)
+	//{
+	//	if(!ServerInstanceEventDelegate.IsBound())
+	//	{
+	//		ServerInstanceEventDelegate.BindUFunction(this , "OnReceivedClientConnectionData");
+	//	}
+	//	MatchMadeInstanceSubsystem->OnReceivedClientConnectionDataEvent.AddUnique(ServerInstanceEventDelegate);
+	//	
+	//	MatchMadeInstanceSubsystem->RequestClientDataFromMatchmakingServer();
+	//}
 }
 
 void AIngameDeathmatchGamemode::Tick(float DeltaSeconds)
@@ -108,7 +110,7 @@ ECharacterType AIngameDeathmatchGamemode::ParseCharacterOptionToEnum(const FStri
 	return ECharacterType::Invalid;
 }
 
-void AIngameDeathmatchGamemode::OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients)
-{
-	ClientConnectionData = ExpectedClients;
-}
+//void AIngameDeathmatchGamemode::OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients)
+//{
+//	ClientConnectionData = ExpectedClients;
+//}

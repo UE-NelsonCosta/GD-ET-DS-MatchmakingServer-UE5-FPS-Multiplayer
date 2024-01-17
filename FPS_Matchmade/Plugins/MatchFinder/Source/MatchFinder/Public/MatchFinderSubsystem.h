@@ -1,33 +1,22 @@
+/*
+ * @file MatchFinderSubsystem.h
+ * @brief
+ * - Blueprint facing subsystem to request a match made game. Fires a Thread Job to communicate to the
+ *   Match Making Server (located in root of project)
+ * - Uses events to let the blueprints know what's going on and give feedback to the user
+ * - Uses config files to allow you to quickly configure this system
+ * - Defaults to loopback IP and the preconfigured match making server port (2000)
+ *
+ * @author Nelson Costa
+ * Contact: nelson.costa@universidadeeuropeia.pt
+ */
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interfaces/IPv4/IPv4Endpoint.h"
+#include "WorkerFindMatch.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "MatchFinderSubsystem.generated.h"
-
-// TODO: Move This To A Separate Header File
-// Auxiliary Enumerations
-UENUM(BlueprintType)
-enum class EMatchFinderSubsystemState : uint8
-{
-	Idle,
-	FindingMatch
-};
-
-UENUM(BlueprintType)
-enum class EMatchFindingProgress : uint8
-{
-	Idle,
-	CreatingConnection,
-	LoggingIn,
-	RequestingGame,
-	
-	Complete,
-
-	ConnectionFailed,
-	LoginFailed,
-	FindingFailed,
-};
 
 // Event Declarations
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameFindStarted);
@@ -37,9 +26,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGameFound, FString, IPnPort, FSt
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameFindStateUpdate, FString, State);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMatchFindingFailed, FString, Reason);
-
-// Forward Declarations
-class FWorkerFindMatch;
 
 // NOTE: As this contains important variables to serialize such as where to connect to and port, we keep this data saved
 //		 in configuration files we can easily tweak, if changes are made in engine, they will be saved out, otherwise
@@ -53,9 +39,7 @@ class MATCHFINDER_API UMatchFinderSubsystem : public UGameInstanceSubsystem
 public: // Public Functions
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
 	virtual void Deinitialize() override;
 	
 	UFUNCTION(BlueprintCallable)
@@ -77,6 +61,13 @@ private: // Private Functions
 
 	TSharedPtr<FWorkerFindMatch> GetOrMakeWorkerJob();
 
+	bool RunJob(const TSharedPtr<FWorkerFindMatch>& Job);
+
+	void RunSlowTimer();
+	void ClearSlowTimer();
+	
+	void ProcessSlowTickEvents() const;
+
 public: // Events
 	
 	UPROPERTY(BlueprintAssignable)
@@ -92,86 +83,26 @@ public: // Events
 	FOnGameFindStateUpdate OnGameFindStateUpdateEvent;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnMatchFindingFailed OnOnMatchFindingFailedEvent;
+	FOnMatchFindingFailed OnMatchFindingFailedEvent;
 	
-private:
+private: // Member Variables
 
+	// Keep track of runnable Thread and it's Job
 	TSharedPtr<FRunnableThread> WorkerThread;
 	TSharedPtr<FWorkerFindMatch> WorkerJob;
-	
+
+	// This Objects State When Finding A Match Dependant On The Worker Thread State
 	EMatchFinderSubsystemState MatchFinderState;
 
-	// TODO: If these are ever exposed in the game, please make sure to update the worker
+	// Timer Handle For A Slow Tick
+	FTimerHandle SlowTickHandle;
+	FTimerDelegate TimerDelegate;
+
+private: // Config Variables
+	
 	UPROPERTY(Config)
 	FString MatchmakingServerIP = "127.0.0.1";
 
 	UPROPERTY(Config)
 	uint16 MatchmakingServerPort = 2000;
-
-	FTimerHandle SlowTickHandle;
-};
-
-//https://store.algosyntax.com/tutorials/unreal-engine/ue5-multithreading-with-frunnable-and-thread-workflow/
-class FWorkerFindMatch final : public FRunnable
-{
-public:
-
-	FWorkerFindMatch(const FString& MMServerIP, const uint16 MMServerPort)
-		: MatchmakingServerIP(MMServerIP)
-		, MatchmakingServerPort(MMServerPort)
-		, MatchFindingProgress(EMatchFindingProgress::Idle)
-		, State("")
-		, ResultIPnPort("")
-		, ResultParameters("")
-	{}
-
-	// Called From Caller Thread (This Case Main Thread)
-	virtual bool Init() override;
-	virtual void Stop() override;
-
-	// Called From Threaded Job
-	virtual uint32 Run() override;
-	virtual void Exit() override;
-	
-	// Get A Copy Of A Result Or Progress
-	EMatchFindingProgress GetProgress() const;
-
-	FString GetState()					{ return State;				}
-	FString GetIPnPort()				{ return ResultIPnPort;		}
-	FString GetAdditionalParameters()	{ return ResultParameters;	}
-	
-private: // Internal Functions
-
-	bool CreateSocketObject(FSocket*& SocketToWriteTo);
-	TSharedRef<FInternetAddr> CreateInternetAddressToMatchmakingServer(const TArray<uint8>& ParsedIPv4);
-	
-	bool FormatIPv4StringToNumerics(FString& IP, TArray<uint8>& Output);
-
-	void CleanseIPOfInvalidCharacters(FString& IP);
-
-	bool IsConsideredAValidIP(const TArray<uint8>& IPValues);
-	bool HasValidPort( uint16 Port );
-
-private: // SocketMessagingChain
-
-	void SendLoginData();
-	bool ReceiveLoginReply();
-
-	void SendGamemodeRequest();
-	bool ReceiveGamemodeReply();
-
-	bool ReceiveGamemodeConnection(FString& OutputIPnPort, FString& OutputParameters);
-	
-private: // Variables
-
-	// IP And Port To Matchmaking Server
-	FString MatchmakingServerIP = "127.0.0.1";
-	uint16  MatchmakingServerPort = 2000;
-	FSocket* SocketToMatchmakingServer = nullptr;
-
-	EMatchFindingProgress MatchFindingProgress;
-
-	FString State;
-	FString ResultIPnPort;
-	FString ResultParameters;
 };

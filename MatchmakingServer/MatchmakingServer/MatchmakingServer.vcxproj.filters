@@ -21,9 +21,6 @@
     <ClCompile Include="GameSession\GameSession.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Job\ClientMessageJob.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ServerSocketManager\ServerSocketManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,9 +36,6 @@
     <ClCompile Include="Utils\Logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Job\AcceptConnectionJob.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ProjectStatics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,6 +49,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\StringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Job\ClientJobs\ClientAcceptConnectionJob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Job\ClientJobs\ClientMessageJob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Job\ServerInstanceJobs\UEServerInstanceAcceptConnectionJob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,9 +77,6 @@
     <ClInclude Include="GameSession\GameSession.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Job\ClientMessageJob.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ServerSocketManager\ServerSocketManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,9 +90,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClientConnection\ClientConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Job\AcceptConnectionJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProjectStatics.h">
@@ -111,6 +108,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\StringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Job\ClientJobs\ClientAcceptConnectionJob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Job\ClientJobs\ClientMessageJob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Job\ServerInstanceJobs\UEServerInstanceAcceptConnectionJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

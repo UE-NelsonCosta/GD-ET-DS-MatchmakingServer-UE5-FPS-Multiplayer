@@ -1,31 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "ClientConnectionData.h"
 #include "ServerInstanceSubsystem.generated.h"
-
-USTRUCT(BlueprintType)
-struct FClientConnectionData
-{
-	GENERATED_BODY()
-
-	FClientConnectionData() = default;
-	
-	FClientConnectionData(FName InClientName, FName InClientLoginToken)
-		: ClientName(InClientName)
-		, ClientLoginToken(InClientLoginToken)
-	{}
-	
-	FName ClientName;
-	FName ClientLoginToken;
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReceivedClientConnectionData, const TArray<FClientConnectionData>&, ExpectedClients );
 
 UCLASS(Config="MatchFinderSubsystem")
-class MATCHFINDERSERVERMANAGER_API UServerInstanceSubsystem : public UGameInstanceSubsystem
+class MATCHFINDER_API UServerInstanceSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	

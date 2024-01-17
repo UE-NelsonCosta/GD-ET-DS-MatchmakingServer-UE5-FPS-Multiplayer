@@ -4,7 +4,6 @@
 #include "GameFramework/GameMode.h"
 #include "GameFramework/PlayerStart.h"
 #include "EnumLib.h"
-#include "ServerInstanceSubsystem.h"
 #include "StructLib.h"
 #include "IngameDeathmatchGamemode.generated.h"
 
@@ -55,7 +54,7 @@ private: // Player Login And Character Creation
 	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
 	virtual void PostLogin(APlayerController* NewPlayer);
 
-	TArray<FClientConnectionData> ClientConnectionData;
+	//TArray<FClientConnectionData> ClientConnectionData;
 	
 	TMap<APlayerController*, FPlayerConnectionData> PlayerConnectionData;
 	
@@ -70,8 +69,8 @@ private: // Player Login And Character Creation
 	
 	TScriptDelegate<> ServerInstanceEventDelegate;
 
-	UFUNCTION()
-	void OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients);
+	//UFUNCTION()
+	//void OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients);
 
 
 
