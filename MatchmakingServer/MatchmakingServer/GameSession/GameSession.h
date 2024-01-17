@@ -12,8 +12,9 @@ class ClientConnection;
 enum class EGameSessionState
 {
     NONE,
-    FindingPlayers,
+    FindingPlayers, // Normal Initial State
     ReadyToLaunch,
+    Launching,
     InProgress,
     ReadyForCleanup,
 };
@@ -30,6 +31,8 @@ public:
     bool IsGameServerReady();
     bool IsGameSessionReadyToBeLaunched();
 
+    void NotifyClientsToStartGame();
+    
     int  GetSessionID();
     EGameSessionState GetGameSessionState();
     void SetGameSessionState(EGameSessionState NewState);
@@ -40,6 +43,8 @@ public:
 
     std::string GetServerInstanceIPnPort();
 
+    std::string FormatClientConnectionsForUEServerInstance();
+    
 private:
     int SessionID;
 

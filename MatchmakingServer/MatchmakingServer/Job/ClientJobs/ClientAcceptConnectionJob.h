@@ -4,7 +4,7 @@
 
 class ServerSocketManager;
 
-class AcceptConnectionJob : public IThreadableJob
+class ClientAcceptConnectionJob : public IThreadableJob
 {
 public:
 

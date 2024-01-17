@@ -26,17 +26,17 @@
 #include <WinSock2.h>
 #include <vector>
 #include <ProjectMacros.h>
-#include <thread>
 #include <mutex>
 #include <ClientConnection/ClientConnection.h>
-#include <Job/AcceptConnectionJob.h>
-#include <Job/ClientMessageJob.h>
+#include <Job/ClientJobs/ClientAcceptConnectionJob.h>
+#include <Job/ClientJobs/ClientMessageJob.h>
 #include <Utils/ASingleton.h>
 
 
 class ServerSocketManager : public ASingleton<ServerSocketManager>
 {
-    friend class AcceptConnectionJob;
+    friend class ClientAcceptConnectionJob;
+    friend class UEServerInstanceAcceptConnectionJob;
     friend int RunApplication();
 
 public:
@@ -68,9 +68,16 @@ private: // Initialization
 
     void InitializeServerData();
     int  InitializeWSAStartup();
-    int  CreateServerSocket();
-    int  BindSocketToAddress();
-    int  SetSocketToListenState();
+
+    int  InitializeClientListenSocket();
+    int  CreateClientListenSocket();
+    int  BindClientListenSocketToAddress();
+    int  SetClientListenSocketToListenState();
+
+    int  InitializeServerInstanceListenSocket();
+    int  CreateServerInstanceListenSocket();
+    int  BindServerInstanceListenSocketToAddress();
+    int  SetServerInstanceListenSocketToListenState();
 
 private: // Terminations
 
@@ -84,14 +91,20 @@ private:
 
     // Declaring Defaults For Project
     const char*     DefaultExecutionPath    = "";
-    const int		DefaultServerSocketPort = ClientListenSocketPort;
+    const int		DefaultClientListenSocketPort = ClientListenSocketPort;
+    const int		DefaultServerInstanceListenSocketPort = UEServerListenSocketPort;
 
     // Non Const And Overridable Runtime Variables, Using Standard Library Objects To Facilitate Usage
-    std::string		ExecutionPath       = DefaultExecutionPath;
-    int				ServerSocketPort    = DefaultServerSocketPort;
+    std::string		ExecutionPath            = DefaultExecutionPath;
+    int				ClientListenPort         = DefaultClientListenSocketPort;
+    int				ServerInstanceListenPort = DefaultServerInstanceListenSocketPort;
 
-    SOCKET			ServerSocket = 0;
-    SOCKADDR_IN		ServerAddress;
+    SOCKET			Client_ListenSocket = 0;
+    SOCKADDR_IN		Client_ListenSocketAddress;
+
+    SOCKET			ServerInstance_ListenSocket = 0;
+    SOCKADDR_IN		ServerInstance_ListenSocketAddress;
+
     WSADATA			WSASocketInformation;
 
 private:    // Refactored Code
@@ -101,7 +114,8 @@ private:    // Refactored Code
     std::vector<std::shared_ptr<ClientConnection>>	ClientConnections;
 
     // Keeps Track Of All Threads
-    std::shared_ptr<AcceptConnectionJob> ConnectionJob;
+    std::shared_ptr<ClientAcceptConnectionJob> ClientConnectionJob;
+    std::shared_ptr<UEServerInstanceAcceptConnectionJob> ServerInstanceConnectionJob;
 
     std::mutex ClientMessageJobMutex;
     std::vector<std::shared_ptr<ClientMessageJob>> ClientMessageJobs;

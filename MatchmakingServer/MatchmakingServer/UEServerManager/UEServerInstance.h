@@ -5,6 +5,7 @@ enum EServerInstanceState
 {
 	NONE,
 	Reserved,
+	StartingUp,
 	Running,
 	Completed,
 	MAX

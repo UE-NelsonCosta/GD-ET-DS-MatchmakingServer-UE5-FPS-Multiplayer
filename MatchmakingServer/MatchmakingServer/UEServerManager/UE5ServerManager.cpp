@@ -44,5 +44,19 @@ bool UEServerManager::RunServer(std::weak_ptr<UEServerInstance> ServerInstance)
     system(LaunchParameter.c_str());
 
     // Set The UEServerInstance To The Correct State
-    SharedServerInstance.get()->SetServerInstanceState(EServerInstanceState::Running);
+    SharedServerInstance.get()->SetServerInstanceState(EServerInstanceState::StartingUp);
+}
+
+std::weak_ptr<UEServerInstance> UEServerManager::GetServerInstance(std::string ID)
+{
+    // TODO: use The Hashmap isntead as that should scale better
+    for(int i = 0; i < ServerInstances.size(); ++i)
+    {
+        if(ServerInstances[i]->GetPort() == ID)
+        {
+            return ServerInstances[i];
+        }
+    }
+
+    return std::weak_ptr<UEServerInstance>{};
 }

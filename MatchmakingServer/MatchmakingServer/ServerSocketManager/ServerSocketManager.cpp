@@ -2,6 +2,7 @@
 #include "../Utils/Logging.h"
 #include <ws2tcpip.h>
 #include "../CommandlineParser/CommandlineParameterParser.h"
+#include "Job/ServerInstanceJobs/UEServerInstanceAcceptConnectionJob.h"
 
 ServerSocketManager::ServerSocketManager()
 {
@@ -13,7 +14,8 @@ int ServerSocketManager::InitializeServerSocket()
 
     InitializeServerData();
 
-    ErrorCode = WSAStartup(MAKEWORD(2, 0), &WSASocketInformation);
+    // Initializes The WSA Process So We Can use Sockets
+    ErrorCode = InitializeWSAStartup();
     if (ErrorCode != NO_ERROR)
     {
         LogWSAErrorToConsole();
@@ -21,8 +23,8 @@ int ServerSocketManager::InitializeServerSocket()
         return ErrorCode;
     }
 
-    // Actually Creates The Socket Object
-    ErrorCode = CreateServerSocket();
+    // Initialize The Client Listen Socket
+    ErrorCode = InitializeClientListenSocket();
     if (ErrorCode != NO_ERROR)
     {
         LogWSAErrorToConsole();
@@ -30,17 +32,7 @@ int ServerSocketManager::InitializeServerSocket()
         return ErrorCode;
     }
 
-    // Uses The Valid Socket Object To Bind To An Address So People Can Connect To It
-    ErrorCode = BindSocketToAddress();
-    if (ErrorCode != NO_ERROR)
-    {
-        LogWSAErrorToConsole();
-
-        return ErrorCode;
-    }
-
-    // Set the socket to listen mode so it can accept incomming connections
-    ErrorCode = SetSocketToListenState();
+    ErrorCode = InitializeServerInstanceListenSocket();
     if (ErrorCode != NO_ERROR)
     {
         LogWSAErrorToConsole();
@@ -53,11 +45,16 @@ int ServerSocketManager::InitializeServerSocket()
 
 int ServerSocketManager::RunServerSocket()
 {
-    ConnectionJob = std::make_shared<AcceptConnectionJob>();
+    ClientConnectionJob = std::make_shared<ClientAcceptConnectionJob>();
 
-    ConnectionJob->InitializeJob();
-    ConnectionJob->RunJob();
+    ClientConnectionJob->InitializeJob();
+    ClientConnectionJob->RunJob();
 
+    ServerInstanceConnectionJob = std::make_shared<UEServerInstanceAcceptConnectionJob>();
+
+    ServerInstanceConnectionJob->InitializeJob();
+    ServerInstanceConnectionJob->RunJob();
+    
     return NO_ERROR;
 }
 
@@ -72,7 +69,6 @@ int ServerSocketManager::TerminateServerSocket()
         LogWSAErrorToConsole();
     }
 
-    // Initializes The WSA Process So We Can use Sockets
     ErrorCode = CloseSocketConnections();
     if (ErrorCode != NO_ERROR)
     {
@@ -125,7 +121,12 @@ void ServerSocketManager::InitializeServerData()
     std::string Value;
     if(Parser.GetArgumentWithKey("OverrideClientListenPort", Value))
     {
-        ServerSocketPort = atoi(Value.c_str());
+        ClientListenPort = atoi(Value.c_str());
+    }
+
+    if(Parser.GetArgumentWithKey("OverrideUEServerListenPort", Value))
+    {
+        ServerInstanceListenPort = atoi(Value.c_str());
     }
 }
 
@@ -136,40 +137,77 @@ int ServerSocketManager::InitializeWSAStartup()
     return WSAStartup(MAKEWORD(2, 0), &WSASocketInformation);
 }
 
-int ServerSocketManager::CreateServerSocket()
+int ServerSocketManager::InitializeClientListenSocket()
 {
-    ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    return ServerSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
+    // Boolean Or On Results As They Are -1 or 0
+    return CreateClientListenSocket() | BindClientListenSocketToAddress() | SetClientListenSocketToListenState();
 }
 
-int ServerSocketManager::BindSocketToAddress()
+// Actually Creates The Socket Object
+int ServerSocketManager::CreateClientListenSocket()
+{
+    Client_ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    return Client_ListenSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
+}
+
+int ServerSocketManager::BindClientListenSocketToAddress()
 {
     // Clear Out Server Socket Memory Then Fill In The Important Information
-    ZeroMemory(&ServerAddress, sizeof(ServerAddress));
-    ServerAddress.sin_family = AF_INET;
-    ServerAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
-    ServerAddress.sin_port = htons(ServerSocketPort);  // Port
+    ZeroMemory(&Client_ListenSocketAddress, sizeof(Client_ListenSocketAddress));
+    Client_ListenSocketAddress.sin_family = AF_INET;
+    Client_ListenSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
+    Client_ListenSocketAddress.sin_port = htons(ClientListenSocketPort);  // Port
 
-    return bind(ServerSocket, (struct sockaddr*)&ServerAddress, sizeof(ServerAddress));
+    // Uses The Valid Socket Object To Bind To An Address So People Can Connect To It
+    return bind(Client_ListenSocket, (struct sockaddr*)&Client_ListenSocketAddress, sizeof(Client_ListenSocketAddress));
 }
 
-int ServerSocketManager::SetSocketToListenState()
+int ServerSocketManager::SetClientListenSocketToListenState()
 {
     //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
-    return listen(ServerSocket, MaxPendingConnections);
+    return listen(Client_ListenSocket, MaxPendingConnections);
+}
+
+int  ServerSocketManager::InitializeServerInstanceListenSocket()
+{
+    return CreateServerInstanceListenSocket() | BindServerInstanceListenSocketToAddress() | SetServerInstanceListenSocketToListenState();
+}
+
+int  ServerSocketManager::CreateServerInstanceListenSocket()
+{
+    ServerInstance_ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    return ServerInstance_ListenSocket == INVALID_SOCKET ? SOCKET_ERROR : NO_ERROR;
+}
+
+int  ServerSocketManager::BindServerInstanceListenSocketToAddress()
+{
+    // Clear Out Server Socket Memory Then Fill In The Important Information
+    ZeroMemory(&ServerInstance_ListenSocketAddress, sizeof(ServerInstance_ListenSocketAddress));
+    ServerInstance_ListenSocketAddress.sin_family = AF_INET;
+    ServerInstance_ListenSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
+    ServerInstance_ListenSocketAddress.sin_port = htons(UEServerListenSocketPort);  // Port
+
+    // Uses The Valid Socket Object To Bind To An Address So People Can Connect To It
+    return bind(ServerInstance_ListenSocket, (struct sockaddr*)&ServerInstance_ListenSocketAddress, sizeof(ServerInstance_ListenSocketAddress));
+}
+
+int  ServerSocketManager::SetServerInstanceListenSocketToListenState()
+{
+    //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
+    return listen(ServerInstance_ListenSocket, MaxPendingConnections);
 }
 
 int ServerSocketManager::ShutdownSocketConnections()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown
     // https://learn.microsoft.com/en-gb/windows/win32/winsock/graceful-shutdown-linger-options-and-socket-closure-2?redirectedfrom=MSDN
-    return shutdown(ServerSocket, SD_BOTH);
+    return shutdown(Client_ListenSocket, SD_BOTH);
 }
 
 int ServerSocketManager::CloseSocketConnections()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-closesocket
-    return closesocket(ServerSocket);
+    return closesocket(Client_ListenSocket);
 }
 
 int ServerSocketManager::TerminateWSA()

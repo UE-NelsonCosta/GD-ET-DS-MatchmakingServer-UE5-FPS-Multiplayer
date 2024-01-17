@@ -1,6 +1,8 @@
 #include "GameSession.h"
 #include <UEServerManager/UE5ServerManager.h>
 
+#include "ClientConnection/ClientConnection.h"
+
 GameSession::GameSession(std::string ServerAddressForSession, std::string ServerPortForSession)
     : SessionID(++GameSessionIDTracker)
 {
@@ -28,6 +30,13 @@ bool GameSession::IsGameSessionReadyToBeLaunched()
     return IsGameSessionFull() && IsGameServerReady();
 }
 
+void GameSession::NotifyClientsToStartGame()
+{
+    CV_AwaitGameSessionFill.notify_all();
+
+    SetGameSessionState(EGameSessionState::InProgress);
+}
+
 int GameSession::GetSessionID()
 {
     return SessionID;
@@ -41,12 +50,6 @@ EGameSessionState GameSession::GetGameSessionState()
 void GameSession::SetGameSessionState(EGameSessionState NewState)
 {
     GameSessionState = NewState;
-
-    // TODO: Stick this in a better place
-    if(GameSessionState == EGameSessionState::InProgress)
-    {
-        CV_AwaitGameSessionFill.notify_all();
-    }
 }
 
 // This Should Already Be Locked From The Previous Function
@@ -70,4 +73,20 @@ std::weak_ptr<UEServerInstance> GameSession::GetServerInstance()
 std::string GameSession::GetServerInstanceIPnPort()
 {
     return ServerInstance.lock()->GetIP() + ":" + ServerInstance.lock()->GetPort();
+}
+
+std::string GameSession::FormatClientConnectionsForUEServerInstance()
+{
+    std::string FinalMessageBuffer;
+    for(int i = 0; i < SessionClients.size(); ++i)
+    {
+        auto Client = SessionClients[i].lock();
+        FinalMessageBuffer += "Name=";
+        FinalMessageBuffer += Client->Username;
+        FinalMessageBuffer += "?AuthToken=";
+        FinalMessageBuffer += Client->AuthToken;
+        FinalMessageBuffer += "|"; // Seperator We Use Between Client Data
+    }
+
+    return FinalMessageBuffer;
 }

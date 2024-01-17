@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <memory>
 #include <UEServerManager/UEServerInstance.h>
@@ -18,12 +19,17 @@ public:
 	// TODO: Set State To Running
 	bool RunServer(std::weak_ptr<UEServerInstance> ServerInstance);
 
+	std::weak_ptr<UEServerInstance> GetServerInstance(std::string ID);
+	
 	// TODO: Then Set To Completed When Your Server Tells You It's Done
 	//		 Then Again Never Use It Again For This Version
-
+	
 
 private:
 
 	std::vector<std::shared_ptr<UEServerInstance>> ServerInstances;
+
+	// TODO: Make This Into A Map Of Games
+	//std::map<int, UEServerInstance> ; 
 };
 

@@ -1,27 +1,27 @@
-#include "AcceptConnectionJob.h"
+#include "ClientAcceptConnectionJob.h"
 #include <ProjectStatics.h>
 #include <Utils/Logging.h>
 #include <winerror.h>
 #include <ws2tcpip.h>
 #include <ServerSocketManager/ServerSocketManager.h>
 
-bool AcceptConnectionJob::InitializeJob()
+bool ClientAcceptConnectionJob::InitializeJob()
 {        
     SocketManager = ServerSocketManager::InstanceAsStrongPointer();
 
     return true;
 }
 
-void AcceptConnectionJob::RunJob()
+void ClientAcceptConnectionJob::RunJob()
 {
-    Worker = std::thread(&AcceptConnectionJob::HandleAcceptConnection, this);
+    Worker = std::thread(&ClientAcceptConnectionJob::HandleAcceptConnection, this);
 }
 
-void AcceptConnectionJob::TerminateJob()
+void ClientAcceptConnectionJob::TerminateJob()
 {
 }
 
-void AcceptConnectionJob::HandleAcceptConnection()
+void ClientAcceptConnectionJob::HandleAcceptConnection()
 {
     while (ProjectStatics::IsApplicationRunning)
     {
@@ -41,7 +41,7 @@ void AcceptConnectionJob::HandleAcceptConnection()
     }
 }
 
-int AcceptConnectionJob::AcceptConnection()
+int ClientAcceptConnectionJob::AcceptConnection()
 {
     std::shared_ptr<ServerSocketManager> SharedSocketManager = SocketManager.lock();
     if (!SharedSocketManager)
@@ -52,7 +52,7 @@ int AcceptConnectionJob::AcceptConnection()
     SOCKADDR_IN Client_Address;
     int ClientAddressSize = sizeof(Client_Address);
 
-    NewClientConnection->ClientSocket = accept(SharedSocketManager->ServerSocket, (struct sockaddr*)&Client_Address, &ClientAddressSize);
+    NewClientConnection->ClientSocket = accept(SharedSocketManager->Client_ListenSocket, (struct sockaddr*)&Client_Address, &ClientAddressSize);
     if (NewClientConnection->ClientSocket == INVALID_SOCKET)
     {
         return SOCKET_ERROR;

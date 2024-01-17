@@ -8,16 +8,52 @@ void GameSessionManager::ValidateStateOfGameSessions()
     for(int i = 0; i < GameSessions.size(); ++i)
     {
         std::shared_ptr<GameSession> CurrentGameSession = GameSessions[i];
-        if(CurrentGameSession.get() && CurrentGameSession->GetGameSessionState() == EGameSessionState::ReadyToLaunch)
+        if(!CurrentGameSession.get())
         {
-            // Let's Launch The UE5 Game Server
-            // Normally we would have a system just to handle what servers are available or not and creates one, for sake of simplicity for now, we just incrementing a single port
-            // TODO: Also relative pathing is weird use absolutes as they are clearer
-            if(UEServerManager::Instance().RunServer(CurrentGameSession->GetServerInstance()))
+            continue;
+        }
+
+        // This Is The Sequence Of States For The Game Sessions
+        switch(CurrentGameSession->GetGameSessionState())
+        {
+        case EGameSessionState::FindingPlayers:
             {
-                CurrentGameSession->SetGameSessionState(EGameSessionState::InProgress);
+                // Nothing To Do Here Till This Is Populated By Client Threads So Let's Leave This Session Alone For Now
+                continue;
             }
-            // TODO: Otherwise Try Again Later Or Disband And Remake The Session
+        case EGameSessionState::ReadyToLaunch:
+            {
+                // All Players Found So Let's Launch A UE Server Instance At Some Port
+                
+                // Normally we would have a system just to handle what servers are available or not and creates one, for sake of simplicity for now, we just incrementing a single port
+                if(UEServerManager::Instance().RunServer(CurrentGameSession->GetServerInstance()))
+                {
+                    CurrentGameSession->SetGameSessionState(EGameSessionState::Launching);
+                }
+                else
+                {
+                    // TODO: Otherwise Try Again Later Or Disband And Remake The Session Or Find Another Port 
+                }
+                
+                break;
+            }
+        case EGameSessionState::Launching:
+            {
+                // Server Thread Will Transition This State When It's Done Initializing
+                break;
+            }
+        case EGameSessionState::InProgress:
+            {
+                // This Is Here To Know It's In Progress, Only Transitions When The Server Says It's Done
+                continue;
+            }
+        case EGameSessionState::ReadyForCleanup:
+            {
+                // State To Cleanup Once This Has All Been Validated
+                break;
+            }
+        default:
+            break; // TODO: Log Some Error As It Shouldn't Be Any Other State
         }
     }
 }
@@ -47,4 +83,16 @@ std::weak_ptr<GameSession> GameSessionManager::RegisterClientToGameSession(std::
     BestMatch->AddClientConnectionToGameSession(Client);
 
     return BestMatch;
+}
+
+std::weak_ptr<GameSession> GameSessionManager::FindGameSessionFrom(
+    const std::weak_ptr<UEServerInstance>& ServerInstance)
+{
+    for(int i = 0; i < GameSessions.size(); ++i)
+    {
+        if(GameSessions[i]->GetServerInstance().lock().get() == ServerInstance.lock().get())
+        {
+            return GameSessions[i];
+        }
+    }
 }

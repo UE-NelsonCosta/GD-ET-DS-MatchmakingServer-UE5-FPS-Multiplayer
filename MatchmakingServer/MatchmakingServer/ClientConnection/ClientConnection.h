@@ -13,6 +13,8 @@ public:
 
 	std::string AuthToken;
 
+	std::string Character;
+
 	// Input Buffer For Each Thread To Make Use Of
 	char InputBuffer[MessageBufferSize];
 };

@@ -11,6 +11,9 @@ public:
 
 	std::weak_ptr<GameSession> RegisterClientToGameSession(std::weak_ptr<ClientConnection> Client);
 
+	std::weak_ptr<GameSession> FindGameSessionFrom(const std::weak_ptr<UEServerInstance>& ServerInstance);
+	
+	
 private:
 
 	std::mutex SessionMutex;

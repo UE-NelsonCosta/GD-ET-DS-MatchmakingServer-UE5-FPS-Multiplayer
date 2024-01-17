@@ -1,28 +1,27 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "GameFramework/PlayerStart.h"
+#include "EnumLib.h"
+#include "ServerInstanceSubsystem.h"
+#include "StructLib.h"
 #include "IngameDeathmatchGamemode.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class FPS_MATCHMADE_API AIngameDeathmatchGamemode final : public AGameMode
+class FPS_MATCHMADE_API AIngameDeathmatchGamemode : public AGameMode
 {
 	GENERATED_BODY()
 
-	virtual void BeginPlay() override;
+public: // Gameplay Functions
+	
+	virtual void StartPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// Login Functions
-	// NOTE: We use these to login and initialize player options
-
-		/**
+private: // Player Login And Character Creation
+	
+	/**
 	 * Accept or reject a player attempting to join the server.  Fails login if you set the ErrorMessage to a non-empty string.
 	 * PreLogin is called before Login.  Significant game time may pass before Login is called
 	 *
@@ -56,23 +55,23 @@ class FPS_MATCHMADE_API AIngameDeathmatchGamemode final : public AGameMode
 	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
 	virtual void PostLogin(APlayerController* NewPlayer);
 
-
-	UPROPERTY()
-	ACharacter* TeamBluePawn;
-
-	UPROPERTY()
-	ACharacter* TeamRedPawn;
-
+	TArray<FClientConnectionData> ClientConnectionData;
+	
+	TMap<APlayerController*, FPlayerConnectionData> PlayerConnectionData;
+	
+	virtual ECharacterType ParseCharacterOptionToEnum(const FString& CharacterOption);
+	
 	UPROPERTY()
 	TArray<APlayerStart*> BlueTeamSpawns;
 	
 	UPROPERTY()
 	TArray<APlayerStart*> RedTeamSpawns;
 	
+	
+	TScriptDelegate<> ServerInstanceEventDelegate;
 
-
-
-
+	UFUNCTION()
+	void OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients);
 
 
 

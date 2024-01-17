@@ -17,6 +17,7 @@ public class MatchFinderServerManager : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
+				
 				// ... add other private include paths required here ...
 			}
 			);
@@ -38,6 +39,8 @@ public class MatchFinderServerManager : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"Sockets",
+				"Networking"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
