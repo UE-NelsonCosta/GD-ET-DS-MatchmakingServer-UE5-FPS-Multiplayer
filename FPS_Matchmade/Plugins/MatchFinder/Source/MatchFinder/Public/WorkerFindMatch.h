@@ -1,8 +1,31 @@
-﻿#pragma once
+﻿/*
+ * @file WorkerFindMatch.h
+ * @brief
+ * - CPP Only, Works To Find A Match With The MM Server, Currently It Has To Succeed From Begining To End Otherwise
+ *   Just Cuts The Connection
+ *   TODO: Allow This Worker To Recover From Possible Errors
+ *
+ *   For Additional Links On How Sockets Work Please Refer To
+ *   https://store.algosyntax.com/tutorials/unreal-engine/ue5-multithreading-with-frunnable-and-thread-workflow/
+ *
+ * @author Nelson Costa
+ * Contact: nelson.costa@universidadeeuropeia.pt
+ */
+
+#pragma once
 
 #include "MM_EnumLib.h"
 
-//https://store.algosyntax.com/tutorials/unreal-engine/ue5-multithreading-with-frunnable-and-thread-workflow/
+/* Runs Off A Chain Of Function Calls For Communication
+ * Chain Order Is As Follows
+ *
+ * 1. Request Login
+ * 2. Receive Acknowledgement
+ * 3. Request A Gamemode
+ * 4. Receive Gamefinding Aknowledgement
+ * 5. Receive UE Server Instance IP and Port
+ * 
+ */
 class FWorkerFindMatch final : public FRunnable
 {
 public:
@@ -25,16 +48,20 @@ public:
 	virtual void Exit() override;
 	
 	// Get A Copy Of A Result Or Progress
-	EMatchFindingProgress GetProgress() const;
-
-	FString GetState()					{ return State;				}
-	FString GetIPnPort()				{ return ResultIPnPort;		}
-	FString GetAdditionalParameters()	{ return ResultParameters;	}
+	FString GetState() const					{ return State;				}
+	FString GetIPnPort() const					{ return ResultIPnPort;		}
+	FString GetAdditionalParameters() const		{ return ResultParameters;	}
+	EMatchFindingProgress GetProgress() const	{ return MatchFindingProgress; }
 	
 private: // Internal Functions
 
+	uint32 InitializeConnection();
+	uint32 RunCommunicationChain();
+
+	void CleanupSocket();
+	
 	bool CreateSocketObject(FSocket*& SocketToWriteTo);
-	TSharedRef<FInternetAddr> CreateInternetAddressToMatchmakingServer(const TArray<uint8>& ParsedIPv4);
+	TSharedRef<FInternetAddr> CreateInternetAddressToMatchmakingServer(const TArray<uint8>& ParsedIPv4) const;
 	
 	bool FormatIPv4StringToNumerics(FString& IP, TArray<uint8>& Output);
 
@@ -43,21 +70,24 @@ private: // Internal Functions
 	bool IsConsideredAValidIP(const TArray<uint8>& IPValues);
 	bool HasValidPort( uint16 Port );
 
+	void Sleep();
+
 private: // SocketMessagingChain
 
-	void SendLoginData();
-	bool ReceiveLoginReply();
+	bool SendLoginData() const;
+	bool ReceiveLoginReply() const;
 
-	void SendGamemodeRequest();
-	bool ReceiveGamemodeReply();
+	bool SendGamemodeRequest() const;
+	bool ReceiveGamemodeReply() const;
 
-	bool ReceiveGamemodeConnection(FString& OutputIPnPort, FString& OutputParameters);
+	bool ReceiveGamemodeConnection(FString& OutputIPnPort, FString& OutputParameters) const;
 	
 private: // Variables
 
-	// IP And Port To Matchmaking Server
+	// IP And Port To Matchmaking Server Overriden In Constructor From MatchFinderSubsystem
 	FString MatchmakingServerIP = "127.0.0.1";
 	uint16  MatchmakingServerPort = 2000;
+	
 	class FSocket* SocketToMatchmakingServer = nullptr;
 
 	EMatchFindingProgress MatchFindingProgress;
