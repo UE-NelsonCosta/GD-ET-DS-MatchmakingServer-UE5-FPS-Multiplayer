@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+// Main Thread
 int RunApplication()
 {
 	// This runs a thread on the background that accepts all connections, firing new threads to handle each clients chain of function calls

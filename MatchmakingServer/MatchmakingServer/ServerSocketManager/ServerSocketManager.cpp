@@ -156,7 +156,7 @@ int ServerSocketManager::BindClientListenSocketToAddress()
     ZeroMemory(&Client_ListenSocketAddress, sizeof(Client_ListenSocketAddress));
     Client_ListenSocketAddress.sin_family = AF_INET;
     Client_ListenSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
-    Client_ListenSocketAddress.sin_port = htons(ClientListenSocketPort);  // Port
+    Client_ListenSocketAddress.sin_port = htons(ClientListenPort);  // Port
 
     // Uses The Valid Socket Object To Bind To An Address So People Can Connect To It
     return bind(Client_ListenSocket, (struct sockaddr*)&Client_ListenSocketAddress, sizeof(Client_ListenSocketAddress));
@@ -185,7 +185,7 @@ int  ServerSocketManager::BindServerInstanceListenSocketToAddress()
     ZeroMemory(&ServerInstance_ListenSocketAddress, sizeof(ServerInstance_ListenSocketAddress));
     ServerInstance_ListenSocketAddress.sin_family = AF_INET;
     ServerInstance_ListenSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Accepts A Connection Form Any IP
-    ServerInstance_ListenSocketAddress.sin_port = htons(UEServerListenSocketPort);  // Port
+    ServerInstance_ListenSocketAddress.sin_port = htons(ServerInstanceListenPort);  // Port
 
     // Uses The Valid Socket Object To Bind To An Address So People Can Connect To It
     return bind(ServerInstance_ListenSocket, (struct sockaddr*)&ServerInstance_ListenSocketAddress, sizeof(ServerInstance_ListenSocketAddress));
