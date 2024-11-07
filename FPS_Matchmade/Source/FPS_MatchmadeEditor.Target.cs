@@ -8,8 +8,8 @@ public class FPS_MatchmadeEditorTarget : TargetRules
 	public FPS_MatchmadeEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
+		
 		ExtraModuleNames.AddRange( new string[] { "FPS_Matchmade" } );
 	}
 }

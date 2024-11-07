@@ -8,7 +8,7 @@ public class FPS_MatchmadeServerTarget : TargetRules
 	public FPS_MatchmadeServerTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Server;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
 
 		ExtraModuleNames.AddRange( new string[] { "FPS_Matchmade" } );
 	}

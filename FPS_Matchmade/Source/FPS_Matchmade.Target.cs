@@ -8,7 +8,7 @@ public class FPS_MatchmadeTarget : TargetRules
 	public FPS_MatchmadeTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
 
 		ExtraModuleNames.AddRange( new string[] { "FPS_Matchmade" } );
 	}
