@@ -9,16 +9,13 @@ class UEServerInstanceAcceptConnectionJob : public IThreadableJob
 public:
 
 	virtual bool InitializeJob() override;
-
 	virtual void RunJob()		 override;
-
 	virtual void TerminateJob()  override;
 
 private:
 
-	void HandleAcceptConnection();
-
-	int AcceptConnection();
+	void HandleAcceptConnection() const;
+	int AcceptConnection() const;
 
 	std::weak_ptr<ServerSocketManager> SocketManager;
 

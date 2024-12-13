@@ -78,7 +78,7 @@ int RunApplication()
 		// Note: Was using auto previously, but it was causing a copy of this vector, which resulted in erroneous data! Try not use autos!
 		std::scoped_lock DataLock(ServerSocketManager::Instance().ClientMessageJobMutex);
 		std::vector<std::shared_ptr<ClientMessageJob>>& ClientJobs = ServerSocketManager::Instance().ClientMessageJobs;
-		for(auto iterator = ClientJobs.begin(); iterator != ClientJobs.end(); ++iterator)
+		for(auto	iterator = ClientJobs.begin(); iterator != ClientJobs.end(); ++iterator)
 		{
 			std::shared_ptr<ClientMessageJob> CurrentClientJob = *iterator;
 

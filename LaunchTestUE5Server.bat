@@ -3,7 +3,7 @@
 
 :: This first part of pathing can be automated refer to the link below
 :: https://gist.github.com/Ji-Rath/5eadf6259c61e85ad5382f50023dcfeb
-set EditorLocation="C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\Win64\UnrealEditor.exe"
+set EditorLocation="C:\Program Files\Epic Games\UE_5.4\Engine\Binaries\Win64\UnrealEditor.exe"
 set UProjectLocation="%~dp0FPS_Matchmade\FPS_Matchmade.uproject"
 set ServerBaseParameters=-server -log
 

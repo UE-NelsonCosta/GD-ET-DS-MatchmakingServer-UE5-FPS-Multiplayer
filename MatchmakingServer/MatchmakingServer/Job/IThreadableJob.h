@@ -6,6 +6,7 @@
 class IThreadableJob
 {
 public:
+	virtual ~IThreadableJob() = default;
 
 	virtual bool InitializeJob()	= 0;
 	virtual void RunJob()			= 0;

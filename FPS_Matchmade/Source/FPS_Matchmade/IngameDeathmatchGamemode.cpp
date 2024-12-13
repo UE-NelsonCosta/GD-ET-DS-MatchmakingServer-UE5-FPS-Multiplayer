@@ -4,9 +4,30 @@
 #include "IngameDeathmatchGamemode.h"
 
 //#include "ServerInstanceSubsystem.h"
-
+#include "MatchFinder/Public/ServerInstanceSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
+
+void AIngameDeathmatchGamemode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if(!World)
+	{
+		// TODO: Log Error
+		return;
+	}
+
+	UServerInstanceSubsystem* ServerInstanceSubsystem = World->GetGameInstance()->GetSubsystem<UServerInstanceSubsystem>();
+	if(!ServerInstanceSubsystem)
+	{
+		// TODO: Log Error
+		return;
+	}
+
+	ServerInstanceSubsystem->RequestClientDataFromMatchmakingServer();
+}
 
 void AIngameDeathmatchGamemode::StartPlay()
 {
@@ -61,16 +82,18 @@ void AIngameDeathmatchGamemode::PreLogin(const FString& Options, const FString& 
 		
 		ErrorMessage += StringBuilder.ToString();
 		UE_LOG(LogTemp, Error, TEXT("%s"), StringBuilder.ToString() );
+
+		// Dump Expected Values
+		DumpClientAuthTokens();
 	}
-	
-	const FString CharacterKey  = TEXT("Character");
-	const FString CharacterValue = UGameplayStatics::ParseOption( Options, CharacterKey );
-	if(CharacterValue.IsEmpty() || GetCharacterFromString(*CharacterValue) == ECharacterType::Invalid )
+
+	if(!IsClientAuthTokenValid(AuthValue))
 	{
-		TStringBuilder<128> StringBuilder;
-		StringBuilder.Append("None Or Invalid Character Option Passed In!");
-		
-		ErrorMessage += StringBuilder.ToString();
+		TStringBuilder<256> StringBuilder;
+		StringBuilder.Append("Client With Auth Token: ");
+		StringBuilder.Append(AuthValue);
+		StringBuilder.Append(" - Tried To Connect With Invalid Token!");
+
 		UE_LOG(LogTemp, Error, TEXT("%s"), StringBuilder.ToString() );
 	}
 }
@@ -93,8 +116,53 @@ APlayerController* AIngameDeathmatchGamemode::Login(UPlayer* NewPlayer, ENetRole
 	FString InName = UGameplayStatics::ParseOption(Options, TEXT("Name")).Left(20);
 	ChangeName(PlayerController, InName, false);
 
+	FString InAuthToken = UGameplayStatics::ParseOption(Options, TEXT("AuthToken")).Left(20);
+	if(!IsClientAuthTokenValid(InAuthToken))
+	{
+		// TODO: Return Some Error Message of Invalid Login Token For This Session
+		return nullptr;
+	}
+	
 	return PlayerController;
 }
+
+bool AIngameDeathmatchGamemode::IsClientAuthTokenValid(const FString& InAuthToken) const
+{
+	UServerInstanceSubsystem* ServerInstanceSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UServerInstanceSubsystem>();
+	if(ServerInstanceSubsystem && ServerInstanceSubsystem->HasClientConnectionData())
+	{
+		TArray<FClientConnectionData> ClientConnectionData;
+		ServerInstanceSubsystem->GetClientConnectionData(ClientConnectionData);
+		
+		for(int i = 0; i < ClientConnectionData.Num(); ++i)
+		{
+			if(ClientConnectionData[i].ClientLoginToken == InAuthToken)
+			{
+				return true;
+			}
+		}	
+	}
+
+	return false;
+}
+
+void AIngameDeathmatchGamemode::DumpClientAuthTokens() const
+{
+	UE_LOG(LogTemp, Error, TEXT("Dumping AuthTokens:") );
+
+	UServerInstanceSubsystem* ServerInstanceSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UServerInstanceSubsystem>();
+	if(ServerInstanceSubsystem && ServerInstanceSubsystem->HasClientConnectionData())
+	{
+		TArray<FClientConnectionData> ClientConnectionData;
+		ServerInstanceSubsystem->GetClientConnectionData(ClientConnectionData);
+		
+		for(int i = 0; i < ClientConnectionData.Num(); ++i)
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s"), *ClientConnectionData[i].ClientLoginToken.ToString() );
+		}
+	}
+}
+
 
 // Dont really want to do anything special here
 void AIngameDeathmatchGamemode::PostLogin(APlayerController* NewPlayer)

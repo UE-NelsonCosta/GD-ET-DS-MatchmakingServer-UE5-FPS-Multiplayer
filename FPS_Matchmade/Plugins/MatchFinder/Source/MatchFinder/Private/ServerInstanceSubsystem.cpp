@@ -68,31 +68,50 @@ bool UServerInstanceSubsystem::RequestClientDataFromMatchmakingServer()
 
 	int32 BytesSent = 0;
 	SocketToMMSI->Send(reinterpret_cast<uint8*>(Payload), MessageLength, BytesSent);
-
 	
 	// Time To Read All Client Data!
 	TArray<uint8> ReadBuffer;
 	ReadBuffer.AddUninitialized(2048);
 
 	FString CompleteMessage;
-	int32 BytesRead = 0;
-	while(BytesRead > 0)
-	{
-		SocketToMMSI->Recv(ReadBuffer.GetData(), 2048, BytesRead);
-		CompleteMessage += ANSI_TO_TCHAR( reinterpret_cast<char*>(ReadBuffer.GetData()) );
-	}
+	int32 BytesRead = SocketToMMSI->Recv(ReadBuffer.GetData(), 2048, BytesRead);
+	CompleteMessage += ANSI_TO_TCHAR( reinterpret_cast<char*>(ReadBuffer.GetData()) );
 
+	FString SessionInfo;
+	FString ClientInfo;
+	CompleteMessage.Split("|", &SessionInfo, &ClientInfo);
+	
 	TArray<FString> PerClientSplitString;
-	CompleteMessage.ParseIntoArray(PerClientSplitString, TEXT("|"));
+	ClientInfo.ParseIntoArray(PerClientSplitString, TEXT("?"));
 
-	for(int i = 0; i < PerClientSplitString.Num(); ++i)
+	// TODO: Can make use of the IOnlineSessions In The Future
+	// IOnlineSession::CreateSession()
+	// IOnlineSession::UpdateSession()
+	// IOnlineSession::DestroySession()
+	// https://dev.epicgames.com/documentation/en-us/unreal-engine/online-subsystem-session-interface-in-unreal-engine
+	
+	// Start on 1 as the 0 is the session id
+	for(int i = 1; i < PerClientSplitString.Num(); ++i)
 	{
 		ExpectedGameClientConnections.Emplace
 		(
 			*UGameplayStatics::ParseOption(PerClientSplitString[i], "ClientName"),
 			*UGameplayStatics::ParseOption(PerClientSplitString[i], "AuthToken")
 		);
+
+		UE_LOG(LogTemp, Error, TEXT("Received AuthToken: %s", PerClientSplitString[i]) );
+
 	}
+	
+	// TODO: Ensure the number of players sent it the amount we're expecting to receive
+	
+	// Message Back Letting The MM Server Know We Have Received All The Information And Area Ready To Do The Autobots Roll Out
+	// Let The Server Know Who's Connecting Using The Server's ID
+	const FString ReadyMessage = TEXT("Server Ready");
+	const int32 ReadyMessageLength = ReadyMessage.Len();
+	char* ReadyMessagePayload = TCHAR_TO_ANSI(*ReadyMessage); // Ensure The Encoding Is Correct (From UTF-16 to Byte Sized ANSI for C++)
+
+	SocketToMMSI->Send(reinterpret_cast<uint8*>(ReadyMessagePayload), ReadyMessageLength, BytesSent);	
 	
 	return true;
 }

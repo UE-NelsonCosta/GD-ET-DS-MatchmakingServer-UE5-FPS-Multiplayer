@@ -72,16 +72,16 @@ private: // Initialization
     int  InitializeClientListenSocket();
     int  CreateClientListenSocket();
     int  BindClientListenSocketToAddress();
-    int  SetClientListenSocketToListenState();
+    int  SetClientListenSocketToListenState() const;
 
     int  InitializeServerInstanceListenSocket();
     int  CreateServerInstanceListenSocket();
     int  BindServerInstanceListenSocketToAddress();
-    int  SetServerInstanceListenSocketToListenState();
+    int  SetServerInstanceListenSocketToListenState() const;
 
 private: // Terminations
 
-    int ShutdownSocketConnections();
+    int ShutdownSocketConnections() const;
     int CloseSocketConnections();
     int TerminateWSA();
     void CleanupWorkers();

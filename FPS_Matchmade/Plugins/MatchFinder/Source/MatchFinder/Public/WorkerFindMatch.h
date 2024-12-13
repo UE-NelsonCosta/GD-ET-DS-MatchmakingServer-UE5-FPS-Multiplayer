@@ -75,7 +75,7 @@ private: // Internal Functions
 private: // SocketMessagingChain
 
 	bool SendLoginData() const;
-	bool ReceiveLoginReply() const;
+	bool ReceiveLoginReply();
 
 	bool SendGamemodeRequest() const;
 	bool ReceiveGamemodeReply() const;
@@ -95,4 +95,6 @@ private: // Variables
 	FString State;
 	FString ResultIPnPort;
 	FString ResultParameters;
+
+	FString AuthToken;
 };

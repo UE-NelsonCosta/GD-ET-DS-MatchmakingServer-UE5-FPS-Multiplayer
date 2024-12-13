@@ -22,9 +22,10 @@ void UEServerInstanceAcceptConnectionJob::RunJob()
 
 void UEServerInstanceAcceptConnectionJob::TerminateJob()
 {
+    // TODO: Clean
 }
 
-void UEServerInstanceAcceptConnectionJob::HandleAcceptConnection()
+void UEServerInstanceAcceptConnectionJob::HandleAcceptConnection() const
 {
     while (ProjectStatics::IsApplicationRunning)
     {
@@ -44,49 +45,60 @@ void UEServerInstanceAcceptConnectionJob::HandleAcceptConnection()
     }
 }
 
-int UEServerInstanceAcceptConnectionJob::AcceptConnection()
+int UEServerInstanceAcceptConnectionJob::AcceptConnection() const
 {
-    std::shared_ptr<ServerSocketManager> SharedSocketManager = SocketManager.lock();
+    const std::shared_ptr<ServerSocketManager> SharedSocketManager = SocketManager.lock();
     if (!SharedSocketManager)
         return SOCKET_ERROR;
 
     SOCKET ServerInstanceSocket = 0;
-
     SOCKADDR_IN ServerInstance_Address;
     int ClientAddressSize = sizeof(ServerInstance_Address);
 
-    ServerInstanceSocket = accept(SharedSocketManager->ServerInstance_ListenSocket, (struct sockaddr*)&ServerInstance_Address, &ClientAddressSize);
+    ServerInstanceSocket = accept(SharedSocketManager->ServerInstance_ListenSocket, reinterpret_cast<sockaddr*>(&ServerInstance_Address), &ClientAddressSize);
     if (ServerInstanceSocket == INVALID_SOCKET)
     {
         return SOCKET_ERROR;
     }
 
-    //char addrstr[INET_ADDRSTRLEN];
-    //inet_ntop(AF_INET, &(Client_Address.sin_addr), addrstr, INET_ADDRSTRLEN);
+    char addrstr[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(ServerInstance_Address.sin_addr), addrstr, INET_ADDRSTRLEN);
 
-    //std::string OutputMessage;
-    //OutputMessage += "Accepted Connection From:";
-    //OutputMessage += addrstr;
-    //LogMessage(OutputMessage.c_str());
+    std::string OutputMessage;
+    OutputMessage = OutputMessage + "Accepted Connection From:" + addrstr;
+    LogMessage(OutputMessage.c_str());
 
-
-    
     // Read Port From Socket
-    char ReadBuffer[10];
-    ZeroMemory(&ReadBuffer,10);
-    SharedSocketManager->ReceiveData(ServerInstanceSocket, ReadBuffer);
+    char ReadBuffer[MessageBufferSize];
+    ZeroMemory(&ReadBuffer, MessageBufferSize);
+    int BytesRead = SharedSocketManager->ReceiveData(ServerInstanceSocket, ReadBuffer);
 
-    std::weak_ptr<UEServerInstance> UEServerInstance = UEServerManager::Instance().GetServerInstance(ReadBuffer);
+    const std::weak_ptr<UEServerInstance> UEServerInstance = UEServerManager::Instance().GetServerInstance(ReadBuffer);
+    if (UEServerInstance.expired() || !UEServerInstance.lock().get())
+        return SOCKET_ERROR;
 
     // Find The Clients Associated With A Game Session And Concatenate/Send it all back
     std::weak_ptr<GameSession> GameSession = GameSessionManager::Instance().FindGameSessionFrom(UEServerInstance);
+    if (GameSession.expired() || !UEServerInstance.lock().get())
+        return SOCKET_ERROR;
 
+    // If the session is launching then we can send all that information across
     if(GameSession.lock()->GetGameSessionState() == EGameSessionState::Launching)
     {
         std::string FormatedClientConnections = GameSession.lock()->FormatClientConnectionsForUEServerInstance();
         // Send Data To Server
         ServerSocketManager::Instance().SendData(ServerInstanceSocket,FormatedClientConnections.c_str(), FormatedClientConnections.length());
         
+        char ReceiveBuffer[1024];
+        ZeroMemory(&ReceiveBuffer, sizeof(char) * 1024);
+        ServerSocketManager::Instance().ReceiveData(ServerInstanceSocket, ReceiveBuffer);
+
+        if (strcmp(ReceiveBuffer, "Server Ready") != 0)
+        {
+            // TODO: Log Some Error D:
+            return SOCKET_ERROR;
+        }
+
         // This unlocks the conditional variable lock
         GameSession.lock()->NotifyClientsToStartGame();
 
@@ -102,7 +114,6 @@ int UEServerInstanceAcceptConnectionJob::AcceptConnection()
 
         return NO_ERROR;
     }
-    
     
     return NO_ERROR;
 }

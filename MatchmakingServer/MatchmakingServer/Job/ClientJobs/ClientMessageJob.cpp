@@ -42,11 +42,17 @@ void ClientMessageJob::HandleLoginRequestMessage()
 		ClientConnection->Password = ParsedMessage[2];
 
 		// TODO: Needs to a do an sql query to ensure the login is correct.
-
+		
+		
 		// TODO: Edit This Once We Have A Query Result
 		bool WasQuerySuccessful = true;
 		if (WasQuerySuccessful)
 		{
+			// long long cast ensures it's 8 bytes long aka 64bit representation
+			// Just using this for now as the auth token as it's easy enough and unique enough
+			ClientConnection->AuthToken = std::to_string( (long long)&ClientConnection );
+
+			
 			// Generate Some Auth Token
 			HandleSuccessfulLoginMessage();
 			return;
@@ -59,7 +65,9 @@ void ClientMessageJob::HandleLoginRequestMessage()
 
 void ClientMessageJob::HandleSuccessfulLoginMessage()
 {
-	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, "LGS", 3);
+	std::string DataToSend = "LGS|" + Client.lock()->AuthToken;
+
+	ServerSocket.lock()->SendData(Client.lock()->ClientSocket, DataToSend.c_str(), DataToSend.length());
 
 	HandleRequestGameMessage(5);
 }

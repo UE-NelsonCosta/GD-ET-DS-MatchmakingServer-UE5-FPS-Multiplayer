@@ -7,9 +7,9 @@ USTRUCT(BlueprintType)
 struct FClientConnectionData
 {
 	GENERATED_BODY()
-
-	FClientConnectionData() = default;
 	
+	FClientConnectionData() {}
+
 	FClientConnectionData(FName InClientName, FName InClientLoginToken)
 		: ClientName(InClientName)
 		, ClientLoginToken(InClientLoginToken)

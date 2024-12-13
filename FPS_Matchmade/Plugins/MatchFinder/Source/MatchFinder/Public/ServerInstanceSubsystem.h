@@ -34,6 +34,8 @@ private:
 	
 	TArray<FClientConnectionData> ExpectedGameClientConnections;
 
+	
+
 	UPROPERTY(Config)
 	FString MatchmakingServerIP = "127.0.0.1";
 

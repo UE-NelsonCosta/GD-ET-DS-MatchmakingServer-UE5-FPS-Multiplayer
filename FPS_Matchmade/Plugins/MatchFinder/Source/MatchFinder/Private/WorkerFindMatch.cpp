@@ -175,7 +175,7 @@ bool FWorkerFindMatch::SendLoginData() const
 	return true;
 }
 
-bool FWorkerFindMatch::ReceiveLoginReply() const
+bool FWorkerFindMatch::ReceiveLoginReply()
 {
 	// Buffer To Read Data From
 	TArray<uint8> ReadBuffer;
@@ -191,8 +191,14 @@ bool FWorkerFindMatch::ReceiveLoginReply() const
 
 	// Convert And Let's Check That The Message Corresponds To What We Expect
 	const FString ServerMessage = ANSI_TO_TCHAR( reinterpret_cast<ANSICHAR*>(ReadBuffer.GetData()) ); // Convert To UTF-16 Encoding
-	if(ServerMessage.Find(TEXT("LGS")) == 0)
+
+	FString CommandType;
+	FString CommandParams;
+	ServerMessage.Split(TEXT("|"), &CommandType, &CommandParams);
+
+	if(CommandType.Find(TEXT("LGS")) == 0)
 	{
+		AuthToken = CommandParams;
 		return true;
 	}
 	
@@ -268,6 +274,8 @@ bool FWorkerFindMatch::ReceiveGamemodeConnection(FString& OutputIPnPort, FString
 	if(CommandType.Equals( TEXT("RGC") ) )
 	{
 		OutputIPnPort = CommandParams;
+
+		OutputParameters = "AuthToken="+AuthToken;
 		
 		return true;
 	}

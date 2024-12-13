@@ -45,13 +45,13 @@ int ServerSocketManager::InitializeServerSocket()
 
 int ServerSocketManager::RunServerSocket()
 {
+    // Spawn a thread to handle all the client connection jobs (default port is 2000)
     ClientConnectionJob = std::make_shared<ClientAcceptConnectionJob>();
-
     ClientConnectionJob->InitializeJob();
     ClientConnectionJob->RunJob();
 
+    // Spawn a thread to handle all the server connection jobs (default port is 3000)
     ServerInstanceConnectionJob = std::make_shared<UEServerInstanceAcceptConnectionJob>();
-
     ServerInstanceConnectionJob->InitializeJob();
     ServerInstanceConnectionJob->RunJob();
     
@@ -93,7 +93,7 @@ void ServerSocketManager::AddNewClientMessageHandler(std::weak_ptr<ClientConnect
 {
     std::scoped_lock DataLock(ServerSocketManager::Instance().ClientMessageJobMutex);
 
-    std::shared_ptr<ClientMessageJob> NewClientMessageHandler = ClientMessageJobs.emplace_back(std::make_shared<ClientMessageJob>(Client));
+    const std::shared_ptr<ClientMessageJob> NewClientMessageHandler = ClientMessageJobs.emplace_back(std::make_shared<ClientMessageJob>(Client));
 
     NewClientMessageHandler->InitializeJob();
     NewClientMessageHandler->RunJob();
@@ -101,7 +101,7 @@ void ServerSocketManager::AddNewClientMessageHandler(std::weak_ptr<ClientConnect
 
 void ServerSocketManager::RemoveClientConnection(std::weak_ptr<ClientConnection> Client)
 {
-    std::shared_ptr<ClientConnection> ObjectToFind = Client.lock();
+    const std::shared_ptr<ClientConnection> ObjectToFind = Client.lock();
     for(auto iterator = ClientConnections.begin(); iterator !=  ClientConnections.end(); ++iterator)
     {
         if((*iterator) == ObjectToFind)
@@ -143,7 +143,6 @@ int ServerSocketManager::InitializeClientListenSocket()
     return CreateClientListenSocket() | BindClientListenSocketToAddress() | SetClientListenSocketToListenState();
 }
 
-// Actually Creates The Socket Object
 int ServerSocketManager::CreateClientListenSocket()
 {
     Client_ListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -162,7 +161,7 @@ int ServerSocketManager::BindClientListenSocketToAddress()
     return bind(Client_ListenSocket, (struct sockaddr*)&Client_ListenSocketAddress, sizeof(Client_ListenSocketAddress));
 }
 
-int ServerSocketManager::SetClientListenSocketToListenState()
+int ServerSocketManager::SetClientListenSocketToListenState() const
 {
     //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
     return listen(Client_ListenSocket, MaxPendingConnections);
@@ -191,26 +190,26 @@ int  ServerSocketManager::BindServerInstanceListenSocketToAddress()
     return bind(ServerInstance_ListenSocket, (struct sockaddr*)&ServerInstance_ListenSocketAddress, sizeof(ServerInstance_ListenSocketAddress));
 }
 
-int  ServerSocketManager::SetServerInstanceListenSocketToListenState()
+int  ServerSocketManager::SetServerInstanceListenSocketToListenState() const
 {
     //listen: places a socket in a state of listening for incoming connection;  accept: permits an incoming connection attempt on a socket;  
     return listen(ServerInstance_ListenSocket, MaxPendingConnections);
 }
 
-int ServerSocketManager::ShutdownSocketConnections()
+int  ServerSocketManager::ShutdownSocketConnections() const
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown
     // https://learn.microsoft.com/en-gb/windows/win32/winsock/graceful-shutdown-linger-options-and-socket-closure-2?redirectedfrom=MSDN
     return shutdown(Client_ListenSocket, SD_BOTH);
 }
 
-int ServerSocketManager::CloseSocketConnections()
+int  ServerSocketManager::CloseSocketConnections()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-closesocket
     return closesocket(Client_ListenSocket);
 }
 
-int ServerSocketManager::TerminateWSA()
+int  ServerSocketManager::TerminateWSA()
 {
     // https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsacleanup
     return WSACleanup();
@@ -218,8 +217,10 @@ int ServerSocketManager::TerminateWSA()
 
 void ServerSocketManager::CleanupWorkers()
 {
+    // TODO:
 }
 
 void ServerSocketManager::CleanupServerData()
 {
+    // TODO:
 }

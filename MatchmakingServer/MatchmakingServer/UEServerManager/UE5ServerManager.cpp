@@ -47,6 +47,7 @@ bool UEServerManager::RunServer(std::weak_ptr<UEServerInstance> ServerInstance)
     SharedServerInstance.get()->SetServerInstanceState(EServerInstanceState::StartingUp);
 }
 
+// Allows conversion of char* to string
 std::weak_ptr<UEServerInstance> UEServerManager::GetServerInstance(std::string ID)
 {
     // TODO: use The Hashmap isntead as that should scale better

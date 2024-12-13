@@ -15,6 +15,8 @@ public:
 
 	std::string Character;
 
+	std::string ConnectionSource;
+	
 	// Input Buffer For Each Thread To Make Use Of
 	char InputBuffer[MessageBufferSize];
 };

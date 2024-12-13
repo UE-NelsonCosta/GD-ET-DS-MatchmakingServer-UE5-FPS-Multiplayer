@@ -13,7 +13,8 @@ class FPS_MATCHMADE_API AIngameDeathmatchGamemode : public AGameMode
 	GENERATED_BODY()
 
 public: // Gameplay Functions
-	
+
+	virtual void BeginPlay() override;
 	virtual void StartPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -50,6 +51,9 @@ private: // Player Login And Character Creation
 	 * @return a new player controller for the logged in player, NULL if login failed for any reason
 	 */
 	virtual APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage);
+	bool IsClientAuthTokenValid(const FString& InAuthToken) const;
+
+	void DumpClientAuthTokens() const;
 
 	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
 	virtual void PostLogin(APlayerController* NewPlayer);
@@ -92,3 +96,4 @@ private: // Player Login And Character Creation
 
 
 };
+

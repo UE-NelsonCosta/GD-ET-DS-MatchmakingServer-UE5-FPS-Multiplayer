@@ -78,6 +78,8 @@ std::string GameSession::GetServerInstanceIPnPort()
 std::string GameSession::FormatClientConnectionsForUEServerInstance()
 {
     std::string FinalMessageBuffer;
+    FinalMessageBuffer += "SessionID=" + std::to_string( SessionID ) + "|";
+    
     for(int i = 0; i < SessionClients.size(); ++i)
     {
         auto Client = SessionClients[i].lock();
@@ -85,7 +87,7 @@ std::string GameSession::FormatClientConnectionsForUEServerInstance()
         FinalMessageBuffer += Client->Username;
         FinalMessageBuffer += "?AuthToken=";
         FinalMessageBuffer += Client->AuthToken;
-        FinalMessageBuffer += "|"; // Seperator We Use Between Client Data
+        FinalMessageBuffer += "?"; // Seperator We Use Between Client Data
     }
 
     return FinalMessageBuffer;
