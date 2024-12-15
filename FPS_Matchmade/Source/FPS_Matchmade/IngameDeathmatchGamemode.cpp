@@ -4,6 +4,8 @@
 #include "IngameDeathmatchGamemode.h"
 
 //#include "ServerInstanceSubsystem.h"
+#include "SelectablePlayerCharacterData.h"
+#include "GameFramework/Character.h"
 #include "MatchFinder/Public/ServerInstanceSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,6 +20,18 @@ void AIngameDeathmatchGamemode::BeginPlay()
 		// TODO: Log Error
 		return;
 	}
+
+	// Resolve The Soft Reference object first then load it yourself if it fails
+	SelectablePlayerCharacterDataTable = Cast<UDataTable>(DataTablePath.ResolveObject());
+	if(!SelectablePlayerCharacterDataTable)
+	{
+		// Unless you done goofed the asset path this should work
+		SelectablePlayerCharacterDataTable = Cast<UDataTable>(DataTablePath.TryLoad());
+	}
+
+	// Disabled For Now
+	// UGameplayStatics::GetAllActorsWithTag(GetWorld(), "BlueTeamSpawn", BlueTeamSpawns);
+	// UGameplayStatics::GetAllActorsWithTag(GetWorld(), "RedTeamSpawn", RedTeamSpawns);
 
 	UServerInstanceSubsystem* ServerInstanceSubsystem = World->GetGameInstance()->GetSubsystem<UServerInstanceSubsystem>();
 	if(!ServerInstanceSubsystem)
@@ -70,6 +84,8 @@ void AIngameDeathmatchGamemode::PreLogin(const FString& Options, const FString& 
 
 	// Not doing this now but if you'd like additional connection that are just to spectate then you could set the option SpectatorOnly=1
 	// That will handle the spectator controller in the next option and return early from here
+
+	UE_LOG(LogTemp, Warning, TEXT("Connection Options = %s"), *Options );
 	
 	const FString AuthKey  = TEXT("AuthToken");
 	const FString AuthValue = UGameplayStatics::ParseOption( Options, AuthKey );
@@ -83,6 +99,10 @@ void AIngameDeathmatchGamemode::PreLogin(const FString& Options, const FString& 
 		ErrorMessage += StringBuilder.ToString();
 		UE_LOG(LogTemp, Error, TEXT("%s"), StringBuilder.ToString() );
 
+		UE_LOG(LogTemp, Error, TEXT("AuthValue = %s"), *AuthValue );
+		UE_LOG(LogTemp, Error, TEXT("Options = %s"), *Options );
+		
+
 		// Dump Expected Values
 		DumpClientAuthTokens();
 	}
@@ -95,6 +115,8 @@ void AIngameDeathmatchGamemode::PreLogin(const FString& Options, const FString& 
 		StringBuilder.Append(" - Tried To Connect With Invalid Token!");
 
 		UE_LOG(LogTemp, Error, TEXT("%s"), StringBuilder.ToString() );
+
+		DumpClientAuthTokens();
 	}
 }
 
@@ -169,7 +191,42 @@ void AIngameDeathmatchGamemode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	// Spawn Actual Character Etc, it is possible to do most of this in the previous function mind you
+	// Let's Spawn The Character For The Player
+	// It's not implemented yet but this data can be sent across and given to the server to handle as he sees fit
+	// For now we just alternate
+
+	static const FName MannyTableID = "Manny";
+	static const FName QuinnTableID = "Quinn";
+
+	static int LastSpawnedCharacter = 0;
+	
+	FSelectablePlayerCharacterData* SelectedCharacterRow = SelectablePlayerCharacterDataTable->FindRow<FSelectablePlayerCharacterData>(LastSpawnedCharacter++ % 2 == 0 ? MannyTableID : QuinnTableID, "");
+	if(!SelectedCharacterRow)
+	{
+		// Log Some Error
+		return;
+	}
+
+	UClass* CharacterClassToSpawn = SelectedCharacterRow->CharacterSoftClassPointer.LoadSynchronous();
+
+	// This exists as a default implementation, We could get our own find whats in the scene with tags etc.
+	// Second parameter is to use a tag to find a specific type of player start such as red or blue teams
+	const AActor* SelectedPlayerStart = FindPlayerStart(NewPlayer, "");
+
+	const FVector PlayerLocation = SelectedPlayerStart->GetActorLocation();
+	const FRotator PlayerRotation = SelectedPlayerStart->GetActorRotation();
+	
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ACharacter* SpawnedCharacter = Cast<ACharacter>(GetWorld()->SpawnActor(CharacterClassToSpawn, &PlayerLocation, &PlayerRotation, SpawnParameters));
+	if(!SpawnedCharacter)
+	{
+		// Some Error Message;
+		return;
+	}
+
+	NewPlayer->Possess(SpawnedCharacter);
+	SpawnedCharacter->SetOwner(NewPlayer);
 }
 
 ECharacterType AIngameDeathmatchGamemode::ParseCharacterOptionToEnum(const FString& CharacterOption)

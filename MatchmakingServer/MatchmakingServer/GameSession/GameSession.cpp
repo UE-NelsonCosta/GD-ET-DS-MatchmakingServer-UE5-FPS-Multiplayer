@@ -83,11 +83,11 @@ std::string GameSession::FormatClientConnectionsForUEServerInstance()
     for(int i = 0; i < SessionClients.size(); ++i)
     {
         auto Client = SessionClients[i].lock();
-        FinalMessageBuffer += "Name=";
+        FinalMessageBuffer += "?Name="; // First Question Mark Is Required By The Option Parser In UE5
         FinalMessageBuffer += Client->Username;
         FinalMessageBuffer += "?AuthToken=";
         FinalMessageBuffer += Client->AuthToken;
-        FinalMessageBuffer += "?"; // Seperator We Use Between Client Data
+        FinalMessageBuffer += "|"; // Seperator We Use Between Client Data
     }
 
     return FinalMessageBuffer;

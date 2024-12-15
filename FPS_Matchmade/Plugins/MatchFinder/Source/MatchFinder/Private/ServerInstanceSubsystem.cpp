@@ -80,9 +80,22 @@ bool UServerInstanceSubsystem::RequestClientDataFromMatchmakingServer()
 	FString SessionInfo;
 	FString ClientInfo;
 	CompleteMessage.Split("|", &SessionInfo, &ClientInfo);
-	
+
+	//UE_LOG(LogTemp, Error, TEXT("SessionInfo: %s"), *SessionInfo);
+	//UE_LOG(LogTemp, Error, TEXT("ClientInfo: %s\n\n"), *ClientInfo);
+
+	// Split Client Info Into Smaller Chunks To Process Ahead
 	TArray<FString> PerClientSplitString;
-	ClientInfo.ParseIntoArray(PerClientSplitString, TEXT("?"));
+	ClientInfo.ParseIntoArray(PerClientSplitString, TEXT("|"));
+
+	/*
+	UE_LOG(LogTemp, Error, TEXT("\n\nSplitClientInfo - START:"));
+	for(int i = 0; i < PerClientSplitString.Num(); ++i)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s"), *PerClientSplitString[i]);
+	}
+	UE_LOG(LogTemp, Error, TEXT("SplitClientInfo - END:"));
+	*/
 
 	// TODO: Can make use of the IOnlineSessions In The Future
 	// IOnlineSession::CreateSession()
@@ -91,16 +104,16 @@ bool UServerInstanceSubsystem::RequestClientDataFromMatchmakingServer()
 	// https://dev.epicgames.com/documentation/en-us/unreal-engine/online-subsystem-session-interface-in-unreal-engine
 	
 	// Start on 1 as the 0 is the session id
-	for(int i = 1; i < PerClientSplitString.Num(); ++i)
+	for(int i = 0; i < PerClientSplitString.Num(); ++i)
 	{
 		ExpectedGameClientConnections.Emplace
 		(
-			*UGameplayStatics::ParseOption(PerClientSplitString[i], "ClientName"),
+			*UGameplayStatics::ParseOption(PerClientSplitString[i], "Name"),
 			*UGameplayStatics::ParseOption(PerClientSplitString[i], "AuthToken")
 		);
 
-		UE_LOG(LogTemp, Error, TEXT("Received AuthToken: %s", PerClientSplitString[i]) );
-
+		//UE_LOG(LogTemp, Error, TEXT("Adding ClientName: %s"), *UGameplayStatics::ParseOption(PerClientSplitString[i], "Name"));
+		//UE_LOG(LogTemp, Error, TEXT("Adding AuthToken: %s"),  *UGameplayStatics::ParseOption(PerClientSplitString[i], "AuthToken"));
 	}
 	
 	// TODO: Ensure the number of players sent it the amount we're expecting to receive

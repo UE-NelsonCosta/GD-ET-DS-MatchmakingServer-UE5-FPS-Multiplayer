@@ -31,6 +31,7 @@ void UMatchFinderSubsystem::Deinitialize()
 
 void UMatchFinderSubsystem::RequestGame()
 {
+	// TODO: Thread seems to stay alive? Needs investigation
 	if(WorkerThread.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UMatchFinderSubsystem::RequestGame - Cannot Request A Game Whilst One Is Already being Requested!"));

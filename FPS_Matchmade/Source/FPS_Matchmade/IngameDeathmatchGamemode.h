@@ -51,47 +51,40 @@ private: // Player Login And Character Creation
 	 * @return a new player controller for the logged in player, NULL if login failed for any reason
 	 */
 	virtual APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage);
+
+	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the
+	 * PlayerController. */
+	virtual void PostLogin(APlayerController* NewPlayer);
+
+private: // Interal Helpers
+
 	bool IsClientAuthTokenValid(const FString& InAuthToken) const;
 
 	void DumpClientAuthTokens() const;
 
-	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
-	virtual void PostLogin(APlayerController* NewPlayer);
+	ECharacterType ParseCharacterOptionToEnum(const FString& CharacterOption);
 
-	//TArray<FClientConnectionData> ClientConnectionData;
 	
-	TMap<APlayerController*, FPlayerConnectionData> PlayerConnectionData;
-	
-	virtual ECharacterType ParseCharacterOptionToEnum(const FString& CharacterOption);
+	// Not used right now but we can keep track of this information for letting any other system of results etc
+	//TMap<APlayerController*, FPlayerConnectionData> PlayerConnectionData;
 	
 	UPROPERTY()
-	TArray<APlayerStart*> BlueTeamSpawns;
+	TArray<AActor*> BlueTeamSpawns;
 	
 	UPROPERTY()
-	TArray<APlayerStart*> RedTeamSpawns;
+	TArray<AActor*> RedTeamSpawns;
+
+protected:
 	
+	// Default One, But We Can Change It To Another If It Makes Sense To Do So
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FSoftObjectPath DataTablePath = FSoftObjectPath(TEXT("/Game/DT_SelectablePlayerCharacters.DT_SelectablePlayerCharacters"));
+
+private:
+	// Actual Runtime DataTable
+	UPROPERTY()
+	UDataTable* SelectablePlayerCharacterDataTable;
 	
-	TScriptDelegate<> ServerInstanceEventDelegate;
-
-	//UFUNCTION()
-	//void OnReceivedClientConnectionData(const TArray<FClientConnectionData>& ExpectedClients);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
