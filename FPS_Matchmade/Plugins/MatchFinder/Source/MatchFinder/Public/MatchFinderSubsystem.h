@@ -31,7 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMatchFindingFailed, FString, Reas
 //		 in configuration files we can easily tweak, if changes are made in engine, they will be saved out, otherwise
 //		 in editor change them in PROJECTDIR\Saved\Config\WindowsEditor\MatchFinderSubsystem.ini
 //		 Worth noting this isn't a tracked file on github, so if you dont see it, just run the game once
-UCLASS(Config="MatchFinderSubsystem")
+UCLASS(Config="MatchFinderSubsystemUser")
 class MATCHFINDER_API UMatchFinderSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()

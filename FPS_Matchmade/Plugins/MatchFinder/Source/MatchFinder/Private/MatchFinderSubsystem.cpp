@@ -19,6 +19,11 @@ void UMatchFinderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	// Example code to let UE5 know if you have other subsystems that need to initialize before this one
 	// Collection.InitializeDependency();
+
+	// Just here to force the file to appear if one is not there 
+	LoadConfig();
+
+	SaveConfig();
 }
 
 void UMatchFinderSubsystem::Deinitialize()

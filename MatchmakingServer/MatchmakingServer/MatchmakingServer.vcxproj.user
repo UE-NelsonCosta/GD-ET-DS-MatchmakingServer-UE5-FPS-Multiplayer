@@ -4,7 +4,7 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>UE5LauncherRelativePath=../../../</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>UE5LauncherRelativePath=../../../ UEServerIP=192.168.1.109</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

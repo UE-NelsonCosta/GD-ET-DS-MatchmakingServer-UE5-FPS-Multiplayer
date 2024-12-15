@@ -8,19 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1c23c8a-688f-4b14-8b15-10dad088e3da" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade.dir/.idea/encodings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.FPS_Matchmade/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Gamemodes/GM_2v2Deathmatch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Gamemodes/GM_2v2Deathmatch.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/Client_Frontend.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Client_Frontend.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Plugins/MatchFinder/Source/MatchFinder/Private/MatchFinderSubsystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/MatchFinder/Source/MatchFinder/Private/MatchFinderSubsystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Plugins/MatchFinder/Source/MatchFinder/Private/ServerInstanceSubsystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Plugins/MatchFinder/Source/MatchFinder/Private/ServerInstanceSubsystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/FPS_Matchmade/IngameDeathmatchGamemode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/FPS_Matchmade/IngameDeathmatchGamemode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/FPS_Matchmade/IngameDeathmatchGamemode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/FPS_Matchmade/IngameDeathmatchGamemode.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../LaunchTestUE5Server.bat" beforeDir="false" afterPath="$PROJECT_DIR$/../LaunchTestUE5Server.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MatchmakingServer/MatchmakingServer/GameSession/GameSession.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MatchmakingServer/MatchmakingServer/GameSession/GameSession.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MatchmakingServer/MatchmakingServer/MatchmakingServer.vcxproj.user" beforeDir="false" afterPath="$PROJECT_DIR$/../MatchmakingServer/MatchmakingServer/MatchmakingServer.vcxproj.user" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +19,8 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -302,7 +295,7 @@
       <workItem from="1732900458206" duration="1702000" />
       <workItem from="1732902381145" duration="72000" />
       <workItem from="1732902471923" duration="12000" />
-      <workItem from="1734275739851" duration="13111000" />
+      <workItem from="1734275739851" duration="14249000" />
     </task>
     <servers />
   </component>
